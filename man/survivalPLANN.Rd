@@ -10,7 +10,7 @@ modelling survival.
 }
 \usage{
 survivalPLANN(formula, data, inter, size = 32, decay = 0.01,
-                          maxit = 100, MaxNWts = 10000)
+                          maxit = 100, MaxNWts = 10000, ...)
 }
 
 \arguments{
@@ -21,8 +21,8 @@ survivalPLANN(formula, data, inter, size = 32, decay = 0.01,
 \item{decay}{A numeric value for the parameter for weight decay. Default is set to 0.01}
 \item{maxit}{A numeric value for the maximum number of iterations. Default is set to 100.}
 \item{maxNWts}{The maximum allowable number of weights. There is no intrinsic limit in the
-code, but increasing MaxNWts will probably allow fits that are very slow and
-time-consuming. Default is set to 10000}
+code, but increasing MaxNWts will probably allow fits that are very slow and time-consuming. Default is set to 10000}
+\item{...}{Further arguments passed to or from other methods.}
 
 }
 

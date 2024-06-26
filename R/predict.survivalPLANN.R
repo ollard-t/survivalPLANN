@@ -4,6 +4,7 @@ predict.survivalPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
   
   intervals = object$intervals
   formula = object$formula
+  time = object$y[,1]
   
   if(!is.null(newdata))
   {
@@ -22,7 +23,7 @@ predict.survivalPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
                               FUN = seq_along)
   
   
-  predictions <- predict(object$fitsurvivalnet, data_dupli, type ="raw")
+  predictions <- predict(object$fitsurvivalnet, data_dupli, type ="raw", ...)
 
   grouped_df <- split(cbind(data_dupli,predictions),
                      rep(1:ceiling(nrow(data_dupli)/(length(intervals)-1)),
@@ -46,11 +47,12 @@ predict.survivalPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
   }
   colnames(predictions) = c("0",ints_names)
   
-  if(is.null(newtimes))  { newtimes <- sort(unique(object$y[,1]))}
+  if(is.null(newtimes))  { newtimes <- sort(unique(time))}
   else{ 
     if(!is.vector(newtimes))stop("newtimes must be a vector")
+    if(any(max(time)<newtimes))stop("The values of 'newtimes' must not be greater than the max(time) of your training data base")
     idx=findInterval(newtimes, intervals, left.open = TRUE)
-    predictions = predictions[,idx]
+    predictions = predictions[,idx+1]
   }
   
 

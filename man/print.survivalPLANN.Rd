@@ -1,30 +1,20 @@
-\name{predict.survivalPLANN}
-\alias{predict.survivalPLANN}
+\name{print.survivalPLANN}
+\alias{print.survivalPLANN}
 
 \title{
-Predict Method for survivalPLANN objects
+Print Method for survivalPLANN objects
 }
 \description{
-This function produce a prediction from a fitted neural network using the PLANN method to estimate survival. 
+This function prints a description of a fitted neural network using the PLANN method to estimate survival. 
 
 }
 \usage{
-\method{predict}{survivalPLANN}(object, newdata = NULL, newtimes = NULL, ...)
+\method{print}{survivalPLANN}(object, ...)
 }
 
 \arguments{
 \item{object}{The result of a survivalPLANN fit.}
-\item{newdata}{A data frame comprising of new examples to be predicted. If \code{NULL}, the data frame used is the one given in the \code{survivalPLANN} object.}
-\item{newtimes}{A numeric vector comprising of times to get survival estimations. If \code{NULL}, the time values chosen are the ones from the \code{survivalPLANN} object.}
 \item{...}{Further arguments passed to or from other methods.}
-
-}
-
-
-\value{
-\item{times}{The times used for the predicitions.}
-\item{predictions}{A data frame comprising of the predictions from the neural network.}
-
 }
 
 
@@ -54,9 +44,7 @@ db <- data.frame(event=1*(t.sim==y.sim), time=y.sim, X1, X2)
 splann <- survivalPLANN(Surv(time, event) ~ X1 + X2, data=db, inter=2, 
                           size = 32, decay = 0.01, maxit =100, MaxNWts=10000)
                           
-db.new <- data.frame(X1=c(0,0,1,1), X2=c(0,1,0,1))
-
-predict(splann, newdata = db.new)
+print(splann)
 }
 
 
