@@ -1,0 +1,10 @@
+import(nnet)
+
+importFrom("methods", "hasArg")
+
+importFrom("stats", "predict", "ave", "terms", "as.formula")
+  
+export(survivalPLANN)
+
+S3method(predict, survivalPLANN)
+
