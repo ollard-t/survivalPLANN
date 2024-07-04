@@ -47,7 +47,11 @@ predict.survivalPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
   }
   colnames(predictions) = c("0",ints_names)
   
-  if(is.null(newtimes))  { newtimes <- sort(unique(time))}
+  if(is.null(newtimes))  { 
+    newtimes <- sort(unique(time))
+    idx=findInterval(newtimes, intervals, left.open = TRUE)
+    predictions = predictions[,pmin(idx+1,length(intervals-1))]
+      }
   else{ 
     if(!is.vector(newtimes))stop("newtimes must be a vector")
     if(any(max(time)<newtimes))warning("The values of 'newtimes' are  greater than the max(time) of your training data base")    

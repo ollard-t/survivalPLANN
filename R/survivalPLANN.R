@@ -7,9 +7,9 @@ survivalPLANN <- function(formula, data, inter, size = 32, decay = 0.01,
   if (missing(formula)) stop("a formula argument is required")
   if (missing(data)) stop("a data argument is required")
   if (missing(inter)) stop("an inter argument is required")
-  if (class(formula) != "formula") stop("The first argument must be a formula")
-  if (class(data) != "data.frame") stop("The second argument must be a data frame")
-  if (class(inter) != "numeric") stop("The inter argument must be numeric")
+  if (as.character(class(formula)) != "formula") stop("The first argument must be a formula")
+  if (as.character(class(data)) != "data.frame") stop("The second argument must be a data frame")
+  if (as.character(class(inter)) != "numeric") stop("The inter argument must be numeric")
   
   ####### data management
   
