@@ -10,7 +10,7 @@ This function allows to compute a neural network using the PLANN method.
 
 \usage{
 survivalPLANN(formula, data, inter, size = 32, decay = 0.01,
-                          maxit = 100, MaxNWts = 10000, trace = FALSE ...)
+                          maxit = 100, MaxNWts = 10000, trace = FALSE, ...)
 }
 
 \arguments{
