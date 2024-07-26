@@ -10,7 +10,7 @@ This function allows to compute a neural network using the PLANN method.
 
 \usage{
 survivalPLANN(formula, data, inter, size = 32, decay = 0.01,
-                          maxit = 100, MaxNWts = 10000, ...)
+                          maxit = 100, MaxNWts = 10000, trace = FALSE, ...)
 }
 
 \arguments{
@@ -21,6 +21,7 @@ survivalPLANN(formula, data, inter, size = 32, decay = 0.01,
 \item{decay}{A numeric value for the parameter for weight decay. Default is set to 0.01}
 \item{maxit}{A numeric value for the maximum number of iterations. Default is set to 100.}
 \item{MaxNWts}{The maximum allowable number of weights. There is no intrinsic limit in the code, but increasing MaxNWts will probably allow fits that are very slow and time-consuming. Default is set to 10000}
+\item{trace}{A logical argument for tracing optimization. Default is set to FALSE.}
 \item{...}{Further arguments passed to or from other methods.}
 }
 

@@ -1,6 +1,6 @@
 
 survivalPLANN <- function(formula, data, inter, size = 32, decay = 0.01,
-                          maxit =100, MaxNWts=10000, ...)
+                          maxit =100, MaxNWts=10000, trace = FALSE, ...)
 {
   
   ####### check errors
@@ -82,7 +82,7 @@ else{
   }
 
   survnet <- do.call(nnet, c(list(formula = formulaInt, data = data_dup, size = size, maxit = maxit, 
-                                  MaxNWts = MaxNWts, decay = decay, entropy = TRUE), args))
+                                  MaxNWts = MaxNWts, decay = decay, entropy = TRUE, trace = trace), args))
   
   res <- list(formula = formula,
               fitsurvivalnet = survnet,
