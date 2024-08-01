@@ -78,7 +78,7 @@ else{
     dup_count <- as.numeric(table( floor(as.numeric(rownames(data_dup))) ) )
     weights <- rep(weights,dup_count)
     args$weights = weights
-    print(length(args$weights))
+    # print(length(args$weights)) 
   }
 
   survnet <- do.call(nnet, c(list(formula = formulaInt, data = data_dup, size = size, maxit = maxit, 

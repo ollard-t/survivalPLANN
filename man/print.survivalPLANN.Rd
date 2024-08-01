@@ -18,6 +18,7 @@ This function prints a description of the neural network using the PLANN method.
 \item{...}{Further arguments passed to or from other methods.}
 }
 
+\value{No return value for this S3 method.}
 
 \references{Biganzoli E, Boracchi P, Mariani L, and et al. Feed forward neural networks for the analysis of censored survival data: a partial logistic regression approach. Stat Med, 17:1169-86, 1998.}
 
