@@ -1,5 +1,5 @@
 
-survivalPLANN <- function(formula, data, inter, size = 32, decay = 0.01,
+sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
                           maxit =100, MaxNWts=10000, trace = FALSE, ...)
 {
   
@@ -30,11 +30,13 @@ survivalPLANN <- function(formula, data, inter, size = 32, decay = 0.01,
     cova <- cova[na, ]  
   }
   
+  data <- data[na,]
+  
   #### making of intervals from PLANN
   
-  intervals <- unique(c(0, seq(inter,max(time),by=inter), max(time)))
+  if (is.null(pro.time)) {pro.time <- max(time[event==1])} # modif
   
-  data <- data[na,]
+  intervals <- unique(c(0, seq(inter, pro.time, by=inter), pro.time)) # modif
   
   #in which interval the time t is :  
   data$Intervals = findInterval(time, intervals, left.open = TRUE)
@@ -100,6 +102,6 @@ else{
               intervals = intervals,
               missing = !na
               )
-  class(res) <- "survivalPLANN"
+  class(res) <- "sPLANN"
   return(res)
 }

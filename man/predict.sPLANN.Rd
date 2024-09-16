@@ -1,5 +1,5 @@
-\name{predict.survivalPLANN}
-\alias{predict.survivalPLANN}
+\name{predict.sPLANN}
+\alias{predict.sPLANN}
 
 \title{
 Predict Survival From a Neural Network Based on the PLANN Method
@@ -10,13 +10,13 @@ This function produces survival prediction from a neural network based on the PL
 }
 
 \usage{
-\method{predict}{survivalPLANN}(object, newdata = NULL, newtimes = NULL, ...)
+\method{predict}{sPLANN}(object, newdata = NULL, newtimes = NULL, ...)
 }
 
 \arguments{
-\item{object}{The result of the \code{survivalPLANN} function.}
-\item{newdata}{An optional data frame comprising of new examples to be predicted. If \code{NULL}, the data frame used is the one used for training in the \code{survivalPLANN} function.}
-\item{newtimes}{A optional numeric vector comprising of times to get survival estimations. If \code{NULL}, the times are the intervals used in the \code{survivalPLANN} function.}
+\item{object}{The result of the \code{sPLANN} function.}
+\item{newdata}{An optional data frame comprising of new examples to be predicted. If \code{NULL}, the data frame used is the one used for training in the \code{sPLANN} function.}
+\item{newtimes}{A optional numeric vector comprising of times to get survival estimations. If \code{NULL}, the times are the intervals used in the \code{sPLANN} function.}
 \item{...}{Further arguments passed to or from other methods.}
 }
 
@@ -32,7 +32,7 @@ This function produces survival prediction from a neural network based on the PL
 \examples{
 data(dataK)
 
-splann <- survivalPLANN(Surv(time, event) ~ sex + stade + delay, data=dataK, inter=365, 
+splann <- sPLANN(Surv(time, event) ~ sex + stade + delay, data=dataK, inter=365, 
                           size=32, decay=0.01, maxit=200, MaxNWts=10000)
 
 dnew <- data.frame(sex=c(1,2), delay=c(0,0), stade=c(0,0))

@@ -1,5 +1,5 @@
 
-print.survivalPLANN <- function (x, ...)
+print.sPLANN <- function (x, ...)
 {    
    nmiss <- sum(x$missing)
    
