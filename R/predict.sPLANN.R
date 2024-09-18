@@ -50,7 +50,7 @@ predict.sPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
   if(is.null(newtimes))  { 
     newtimes <- sort(unique(time))
     idx=findInterval(newtimes, intervals, left.open = TRUE)
-    predictions = predictions[,pmin(idx+1,length(intervals-1))]
+    predictions = predictions[,pmin(idx+1,length(intervals-1))] #Thomas : vérifier que -1 est bon
       }
   else{ 
     if(!is.vector(newtimes))stop("newtimes must be a vector")

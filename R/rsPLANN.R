@@ -39,7 +39,7 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   
   hP <- matrix(-99, ncol=length(times), nrow=N)
   
-  for (i in 1:N) # @thomas : merci de voir si tu augmenter la vitesse du calcul de hP
+  for (i in 1:N) # @Thomas : merci de voir si tu augmenter la vitesse du calcul de hP
   {
     hP[i,] <- sapply(times, FUN="exphaz", age=data[i,age],
                      sex=data[i,sex], year=data[i,year]) * inter
@@ -89,6 +89,8 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   
   Pcure <- distPinf / (distPinf + (1-distPinf) * survU)
   
+  # warning -> NA pour tCure ...
+  
   res <- list(formula = formula,
               data = data,
               ratetable = ratetable,
@@ -100,55 +102,9 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
               size = splann$size,
               decay = splann$decay,
               fitsurvivalnet = splann,
-              predictions = list(times=times, Fc=distE, Fp = distP, tPcure = Pcure, aPcure = distPinf)
+              predictions = list(times=times, CIFc=distE, CIFp = distP, tPcure = Pcure, aPcure = distPinf, Sp=survP, Sc =  survU)
   )
   
   class(res) <- "rsPLANN"
   return(res)
 }
-
-#data(dataK)
-#data(fr.ratetable)
-
-
-#sp <- sPLANN(Surv(time, event) ~ stade + delay + sex +  biomarker, data = dataK,
-#                             pro.time = 365.241*20, inter=365.241/12, size = 32, decay = 0.01,
-#                            maxit = 500, MaxNWts=10000)
-
-#sp$intervals
-
-#predO <- predict(sp, newtimes=sp$intervals)
-
-#rs1 <- rsPLANN(Surv(time, event) ~ stade + delay + sex +  biomarker, data = dataK,
-#               pro.time = 365.241*20, inter=365.241/12, size = 32, decay = 0.01,
-#               maxit = 500, MaxNWts=10000, ratetable=fr.ratetable,
-#               age="age", sex="sexchara", year="year")
-
-#mdistE <- apply(rs1$predictions$Fc, FUN=mean, MARGIN=2)
-#mdistP <- apply(rs1$predictions$Fp, FUN=mean, MARGIN=2)
-
-#CPD <- cmp.rel(Surv(time, event) ~ 1,
-#               data = dataK, ratetable = fr.ratetable,
-#               rmap=list(age = age, sex = sex, year = year))
-
-#plot(CPD, xlab="Post-diagnostic time (years)", xscale = 365.241, xlim=c(0,13),
-#     ylab="Cumulative incidence function", ylim=c(0,1),
-#     conf.int=c(1,2), col="red")
-#lines(rs1$predictions$times/365.241, mdistE, type="s", col="blue")
-#lines(rs1$predictions$times/365.241, mdistP, type="s", col="blue")
-
-
-#plot(survfit(Surv(time, event) ~ 1, data = dataK), 
-#     ylab="Patient survival", xlab="Post-diagnostic time (years)")
-#lines(rs1$predictions$times, 1-(mdistE+mdistP), type="s", col="blue")
-
-
-#mPcure <- apply(rs1$predictions$tPcure, FUN=mean, MARGIN=2)
-
-#plot(rs1$predictions$times/365.241, mPcure, type="s", col="blue", 
-#     xlab="Post-diagnostic time (years)", ylab="Probability of being cured")
-#abline(h=0.95, col="gray", lty=2)
-#abline(v=min(rs1$predictions$times[mPcure>0.95])/365.241, col="gray", lty=2)
-
-
-

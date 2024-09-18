@@ -35,7 +35,7 @@ rsPLANN(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
 \item{data}{The data frame given with the computed \code{Intervals} column added.}
 \item{pro.time}{The maximum prognostic time.}
 \item{fitsurvivalnet}{The fitted \code{nnet} object.}
-\item{predictions}{A list with the predicted outcomes for the \code{N} individauls in \code{data}: \code{times} is a vector with the \code{P} prognostic times up to \code{pro.time}, \code{Fc} is a \code{N x P} matrix with the cummulative probabilities of death caused by the disease, \code{Fp} is a \code{N x P} matrix with the cummulative probabilities of death of the reference population in \code{ratetable}, \code{tPcure} is a \code{N x P} matrix with the probabilities of being cured conditionnaly to be alive at the progostic times, and \code{aPcure} is a vector with (asymptotic) probabilty of being cured.}
+\item{predictions}{A list with the predicted outcomes for the \code{N} individauls in \code{data}: \code{times} is a vector with the \code{P} prognostic times up to \code{pro.time}, \code{CIFc} is a \code{N x P} matrix with the cummulative probabilities of death caused by the disease, \code{FCIFp} is a \code{N x P} matrix with the cummulative probabilities of death of the reference population in \code{ratetable}, \code{tPcure} is a \code{N x P} matrix with the probabilities of being cured conditionnaly to be alive at the progostic times, \code{aPcure} is a vector with (asymptotic) probabilty of being cured, \code{Sc} is the survival among uncured patients (i.e. given the mortality is all releted to the disease), and Sp is the survival among cured patients (as in the reference population).}
 }
 
 \details{
@@ -54,8 +54,8 @@ rs1 <- rsPLANN(Surv(time, event) ~ stade + delay + sex +  biomarker, data = data
                maxit = 100, MaxNWts=10000, ratetable=fr.ratetable,
                age="age", sex="sexchara", year="year")
 
-mdistE <- apply(rs1$predictions$Fc, FUN=mean, MARGIN=2)
-mdistP <- apply(rs1$predictions$Fp, FUN=mean, MARGIN=2)
+mdistE <- apply(rs1$predictions$CIFc, FUN=mean, MARGIN=2)
+mdistP <- apply(rs1$predictions$CIFp, FUN=mean, MARGIN=2)
 
 plot(rs1$predictions$times/365.241, mdistE,
 xlab="Post-diagnostic time (years)",

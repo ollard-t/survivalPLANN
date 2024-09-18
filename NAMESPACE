@@ -1,10 +1,13 @@
 import(survival)
 import(nnet)
+import(relsurv)
 
 importFrom("methods", "hasArg")
 
 importFrom("stats", "predict", "ave", "terms", "as.formula")
   
+importFrom("RISCA", "roc.net")
+
 importFrom("survivalNET", "expectedhaz")
   
 export(sPLANN)

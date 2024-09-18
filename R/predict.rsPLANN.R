@@ -86,9 +86,9 @@ predict.rsPLANN <- function(object, newdata = NULL, newtimes = NULL, ratetable, 
       if(!is.null(newtimes)) # @Thomas : merci de vérifier que je renvois les bonnes valeurs dans cette condition -> voir plot dans l'exemple du fichier Rd
         {
       idx <- findInterval(newtimes, times, left.open = TRUE)
-      distE <- distE[,pmin(idx+1,length(times-1))]
-      distP <- distP[,pmin(idx+1,length(times-1))]
-      Pcure <- Pcure[,pmin(idx+1,length(times-1))]
+      distE <- distE[,pmin(idx,length(times-1))]
+      distP <- distP[,pmin(idx,length(times-1))]
+      Pcure <- Pcure[,pmin(idx,length(times-1))]
       times <- newtimes
         }
       

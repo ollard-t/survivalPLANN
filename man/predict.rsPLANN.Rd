@@ -42,8 +42,8 @@ rs1 <- rsPLANN(Surv(time, event) ~ stade + delay + sex +  biomarker, data = data
                maxit = 100, MaxNWts=10000, ratetable=fr.ratetable,
                age="age", sex="sexchara", year="year")
 
-mdistE <- apply(rs1$predictions$Fc, FUN=mean, MARGIN=2)
-mdistP <- apply(rs1$predictions$Fp, FUN=mean, MARGIN=2)
+mdistE <- apply(rs1$predictions$CIFc, FUN=mean, MARGIN=2)
+mdistP <- apply(rs1$predictions$CIFp, FUN=mean, MARGIN=2)
 
 plot(rs1$predictions$times/365.241, mdistE,
 xlab="Post-diagnostic time (years)",
