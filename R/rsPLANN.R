@@ -1,7 +1,7 @@
 
 rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
                     maxit=100, MaxNWts=10000, trace=FALSE,
-                    ratetable, age, year, sex) # @Thomas: inclure ratetable et ses arguments dans formula
+                    ratetable) 
 {
   
   ####### check errors
@@ -12,15 +12,51 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   if (as.character(class(data)) != "data.frame") stop("The second argument must be a data frame")
   if (as.character(class(inter)) != "numeric") stop("The inter argument must be numeric")
   
-  if (missing(ratetable)) stop("a table argument is required")
-  if (missing(age)) stop("an age argument is required")
-  if (missing(sex)) stop("a sex argument is required")
-  if (missing(year)) stop("a year argument is required")
+  if (missing(ratetable)) stop("a ratetable argument is required")
+
   
   if (length(dim(ratetable))!=3) stop("The life table must have 3 dimensions: age, year, sex")
   if (dim(ratetable)[3]!=2) stop("The life table must have 3 dimensions: age, year, sex")
   
   ####### data management
+  
+  all_terms <- attr(terms(formula), "term.labels")
+  ratetable_terms <- grep("ratetable\\(", all_terms, value = TRUE)
+  if(length(ratetable_terms) == 0) stop("Error: The formula must contain a ratetable() term.")
+  if(length(ratetable_terms)>1) stop("More than one 'ratetable' term found in  the formula.")
+  
+  formula_string <- as.character(formula)
+  rhs <- gsub("\\+ ratetable\\(.*?\\)", "", formula_string[3]) 
+  formula_string <- paste(formula_string[2], "~", rhs)
+  formula <- as.formula(formula_string)
+  extract_vars <- function(term) {
+    var_string <- sub("^[^\\(]+\\((.*)\\)$", "\\1", term)
+    vars <- trimws(unlist(strsplit(var_string, ",")))
+    return(vars)
+  }
+  assign_ratetable_vars <- function(vars) {
+    age <- year <- sex <- NULL
+    for (var in vars) {
+      if (grepl("age = ", var)) {
+        age <- sub("age = ", "", var)
+      } else if (grepl("year = ", var)) {
+        year <- sub("year = ", "", var)
+      } else if (grepl("sex = ", var)) {
+        sex <- sub("sex = ", "", var)
+      }
+    }
+    unnamed_vars <- setdiff(vars, c(age, sex, year))
+    if (length(unnamed_vars) > 0) {
+      if (is.null(age) && length(unnamed_vars) >= 1) age <- unnamed_vars[1]
+      if (is.null(year) && length(unnamed_vars) >= 2) year <- unnamed_vars[2]
+      if (is.null(sex) && length(unnamed_vars) >= 3) sex <- unnamed_vars[3]
+    }
+    return(list(age = age, year = year, sex = sex))
+  }
+  ratetable_vars <- assign_ratetable_vars(unlist(lapply(ratetable_terms, extract_vars)))
+  age <- data[,ratetable_vars$age]  
+  year <- data[,ratetable_vars$year]
+  sex <- data[,ratetable_vars$sex] 
   
   splann <- sPLANN(formula, data=data, pro.time=pro.time, inter=inter, 
                           size=size, decay=decay, maxit=maxit, MaxNWts=MaxNWts)

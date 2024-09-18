@@ -1,6 +1,16 @@
 
-metrics <- function(times, failures, data, prediction.matrix, prediction.times, metric, pro.time=NULL, ROC.precision=seq(.01, .99, by=.01)) # @thomas : il faaudrait que tu modifies cette fonction avec formula Surv(.) en inpout.
-{
+metrics <- function(formula data, prediction.times, metric, pro.time=NULL, ROC.precision=seq(.01, .99, by=.01)) # @thomas : il faaudrait que tu modifies cette fonction avec formula Surv(.) en inpout.
+{   
+  
+  times <- as.character(formula[[2]][2])
+  failures <- as.character(formula[[2]][3])
+  prediction.matrix <- attr(terms(formula), "term.labels")
+  if(length(attr(terms(formula), "term.labels")) == 0)stop(
+    "A prediction matrix is needed in the formula")
+  if(length(attr(terms(formula), "term.labels")) != 1)stop(
+    "More than one term on the right-hand side of the formula where
+     only one prediction matrix is needed.")
+  
   data.times <- data[,times]
   data.failures <- data[,failures]
   obj_surv <- Surv(data.times, data.failures)
