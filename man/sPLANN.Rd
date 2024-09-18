@@ -1,5 +1,5 @@
-\name{survivalPLANN}
-\alias{survivalPLANN}
+\name{sPLANN}
+\alias{sPLANN}
 
 \title{
 Survival Neural Network by Using the PLANN Method
@@ -9,13 +9,14 @@ This function allows to compute a neural network using the PLANN method.
 }
 
 \usage{
-survivalPLANN(formula, data, inter, size = 32, decay = 0.01,
+sPLANN(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
                           maxit = 100, MaxNWts = 10000, trace = FALSE, ...)
 }
 
 \arguments{
 \item{formula}{a formula object, with the response on the left of a ~ operator, and the terms on the right. The response must be a survival object as returned by the \code{Surv} function.}
 \item{data}{A data frame in which to look for the variables included in the \code{formula}.}
+\item{pro.time}{A numeric value with the maximum prognostic. If \code{NULL}, the maximum prognostic time is the last time for wich an event is observed.}
 \item{inter}{A numeric value representing the length of the intervals.}
 \item{size}{A numeric value for the number of units in the hidden layer. Default is set to 32}
 \item{decay}{A numeric value for the parameter for weight decay. Default is set to 0.01}
@@ -53,7 +54,7 @@ The \code{nnet} loss function parameter is fixed to \code{entropy} as Biganzoli'
 \examples{
 data(dataK)
 
-splann <- survivalPLANN(Surv(time, event) ~ sex + stade + delay, data=dataK, inter=365, 
+splann <- sPLANN(Surv(time, event) ~ sex + stade + delay, data=dataK, inter=365, 
                           size=32, decay=0.01, maxit=100, MaxNWts=10000)
 
 print(splann)

@@ -1,11 +1,18 @@
 import(survival)
 import(nnet)
+import(relsurv)
 
 importFrom("methods", "hasArg")
 
 importFrom("stats", "predict", "ave", "terms", "as.formula")
   
-export(survivalPLANN)
+importFrom("RISCA", "roc.net")
 
-S3method(predict, survivalPLANN)
-S3method(print, survivalPLANN)
+importFrom("survivalNET", "expectedhaz")
+  
+export(sPLANN)
+export(rsPLANN)
+
+S3method(predict, sPLANN)
+S3method(predict, rsPLANN)
+S3method(print, sPLANN)

@@ -1,7 +1,7 @@
 
-predict.survivalPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
+predict.sPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
 {
-  
+
   intervals = object$intervals
   formula = object$formula
   time = object$y[,1]
@@ -50,18 +50,16 @@ predict.survivalPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
   if(is.null(newtimes))  { 
     newtimes <- sort(unique(time))
     idx=findInterval(newtimes, intervals, left.open = TRUE)
-    predictions = predictions[,pmin(idx+1,length(intervals-1))]
+    predictions = predictions[,pmin(idx+1,length(intervals-1))] #Thomas : vérifier que -1 est bon
       }
   else{ 
     if(!is.vector(newtimes))stop("newtimes must be a vector")
-    if(any(max(time)<newtimes))warning("The values of 'newtimes' are  greater than the max(time) of your training data base")    
+    #if(any(max(time)<newtimes))warning("The values of 'newtimes' are  greater than the max(time) of your training data base") #modif   
     idx=findInterval(newtimes, intervals, left.open = TRUE)
     predictions = predictions[,pmin(idx+1,length(intervals-1))]
   }
-  
 
   res <- list(times = newtimes, predictions = predictions)
-  
+
   return(res)
-  
 }

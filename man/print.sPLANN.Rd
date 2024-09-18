@@ -1,5 +1,5 @@
-\name{print.survivalPLANN}
-\alias{print.survivalPLANN}
+\name{print.sPLANN}
+\alias{print.sPLANN}
 
 \title{
 Print Method for a Neural Network Based on the PLANN Method
@@ -10,11 +10,11 @@ This function prints a description of the neural network using the PLANN method.
 }
 
 \usage{
-\method{print}{survivalPLANN}(x, ...)
+\method{print}{sPLANN}(x, ...)
 }
 
 \arguments{
-\item{x}{The result of a survivalPLANN fit.}
+\item{x}{The result of a sPLANN fit.}
 \item{...}{Further arguments passed to or from other methods.}
 }
 
@@ -25,7 +25,7 @@ This function prints a description of the neural network using the PLANN method.
 \examples{
 data(dataK)
 
-splann <- survivalPLANN(Surv(time, event) ~ sex + stade + delay, data=dataK, inter=365, 
+splann <- sPLANN(Surv(time, event) ~ sex + stade + delay, data=dataK, inter=365.241, 
                           size=32, decay=0.01, maxit=100, MaxNWts=10000)
 
 print(splann)
