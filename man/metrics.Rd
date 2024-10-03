@@ -10,16 +10,14 @@ Compute several metrics to evaluate the prognostic capacities with time-to-event
 }
 
 \usage{
-metrics(times, failures, data, prediction.matrix, prediction.times, metric,
+metrics(formula, data, prediction.times, metric,
 pro.time=NULL, ROC.precision=seq(.01, .99, by=.01))
 }
 
 
 \arguments{
-  \item{times}{The name of the variable related the numeric vector with the follow-up times.}
-  \item{failures}{The name of the variable related the numeric vector with the event indicators (0=right censored, 1=event).}
+  \item{formula}{A formula object, with a survival object \code{Surv(time,event)} on the left of a ~ operator, and a prediction matrix on the right. The prediction matrix must have a dimension of n*p, with n being the number of suject and p being the number of prognostic times.}
   \item{data}{A data frame for in which to look for the variables related to the status of the follow-up time (\code{times}) and the event (\code{failures}).}
-  \item{prediction.matrix}{A matrix with the predictions of survivals of each subject (lines) for each prognostic times (columns).}
   \item{prediction.times}{A vector of numeric values with the times of the \code{predictions} (same length than the number of columns of \code{prediction.matrix}).}
   \item{metric}{The metric to compute. See details.}
   \item{pro.time}{This optional value of prognostic time represents the maximum delay for which the capacity of the variable is evaluated. The same unit than the one used in the argument times. Not used for the following metrics: "loglik", "ibs", "bll", and "ibll". Default value is the time at which half of the subjects are still at risk.}
@@ -43,14 +41,12 @@ model <- LIB_COXridge(times="times", failures="failures", data=dataDIVAT2,
   cov.quanti=c("age"),  cov.quali=c("hla", "retransplant", "ecd"), lambda=1)
 
 # The apparent AUC at 10-year post-transplantation
-metrics(times="times", failures="failures", data=dataDIVAT2,
-  prediction.matrix=model$predictions, prediction.times=model$times,
-  metric="auc", pro.time=10)
+metrics(formula = Surv(times, failures)~model$predictions, data=dataDIVAT2,
+   prediction.times=model$times, metric="auc", pro.time=10)
 
 # The integrated Brier score up to 10 years post-transplanation
-metrics(times="times", failures="failures", data=dataDIVAT2,
-  prediction.matrix=model$predictions, prediction.times=model$times,
-  metric="ribs", pro.time=10)
+metrics(formula = Surv(times, failures)~model$predictions, data=dataDIVAT2,
+  prediction.times=model$times, metric="ribs", pro.time=10)
 }
 
 \keyword{Metrics}

@@ -77,8 +77,8 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   
   for (i in 1:N) # @Thomas : merci de voir si tu augmenter la vitesse du calcul de hP
   {
-    hP[i,] <- sapply(times, FUN="exphaz", age=data[i,age],
-                     sex=data[i,sex], year=data[i,year]) * inter
+    hP[i,] <- sapply(times, FUN="exphaz", age=data[i,ratetable_vars$age],
+                     sex=data[i,ratetable_vars$sex], year=data[i,ratetable_vars$year]) * inter
   }
   
   hcumO <- -1*log(survO)
