@@ -1,17 +1,28 @@
 
-metrics <- function(formula, data, prediction.times, metric, pro.time=NULL, ROC.precision=seq(.01, .99, by=.01)) 
+metrics <- function(formula, data, prediction.matrix, prediction.times, metric,
+                    pro.time=NULL, ROC.precision=seq(.01, .99, by=.01)) 
 {   
   
   times <- as.character(formula[[2]][2])
   failures <- as.character(formula[[2]][3])
-  prediction.matrix <- get(attr(terms(formula), "term.labels"))
-  if(length(attr(terms(formula), "term.labels")) == 0)stop(
-    "A prediction matrix is needed in the formula")
-  if(length(attr(terms(formula), "term.labels")) != 1)stop(
+  
+  if(missing(formula))stop("A formula is needed.")
+  
+  if(!(inherits(formula, "formula")))stop("The formula argument must be of class 'formula' and only have '~1' 
+                                         on the right-hand side of the formula.")
+  if(missing(prediction.matrix)) stop("A matrix/data.frame of predictions is needed.")
+  if (!is.matrix(prediction.matrix)){
+    if(!is.data.frame(prediction.matrix)){
+      print("prediction.matrix must be a matrix or a data.frame of numeric values.")}}
+  if(is.matrix(prediction.matrix) & !is.numeric(prediction.matrix))stop("The value of the prediction matrix/data.frame must be numeric.")
+  if(is.data.frame(prediction.matrix) & !is.numeric(as.matrix(prediction.matrix)))stop("The value of the prediction matrix/data.frame must be numeric.")
+  if (dim(prediction.matrix)[2] != length(prediction.times)) 
+    stop("The matrix of predictions must be of ", dim(data)[1], "x", length(prediction.times), " dimensions.")
+  if (dim(prediction.matrix)[1] != dim(data)[1]) 
+    stop("The matrix of predictions must be of ", dim(data)[1], "x", length(prediction.times), " dimensions.")
+  if(length(attr(terms(formula), "term.labels")) != 0)stop(
     "More than one term on the right-hand side of the formula where
-     only one prediction matrix is needed.")
-  if(!is.matrix(prediction.matrix))stop("A matrix of predictions 
-     is needed for the right-hand side of the formula.")
+     it should only be '~1' .")
   if(dim(prediction.matrix)[2] != length(prediction.times))stop("The matrix of predictions must be 
         of ", dim(data)[1],"x", length(prediction.times), " dimensions.")
   if(dim(prediction.matrix)[1] != dim(data)[1])stop("The matrix of predictions must be 
@@ -55,8 +66,11 @@ metrics <- function(formula, data, prediction.times, metric, pro.time=NULL, ROC.
            status <- obj_surv[, 2]
 
            j <- length(timeVector[which(timeVector<=pro.time)])
-           predicted <- prediction.matrix[,prediction.times>=pro.time][,1]  #survs[j, ]
-
+           if(max(timeVector) == pro.time){
+             predicted <- prediction.matrix[,prediction.times>=pro.time]  #survs[j, ]
+           }else{
+            predicted <- prediction.matrix[,prediction.times>=pro.time][,1]  #survs[j, ]
+           }
            permissible <- 0 # comparable pairs
            concord <- 0 # completely concordance
            par_concord <- 0 # partial concordance
@@ -162,11 +176,11 @@ metrics <- function(formula, data, prediction.times, metric, pro.time=NULL, ROC.
          auc={
            .data <- data.frame(times=data[,times], failures=data[,failures],
                                variable=1-prediction.matrix[,prediction.times>=pro.time][,1])
-           RET <- roc(times="times", failures="failures", variable="variable",
+           RET <- roc.time(times="times", failures="failures", variable="variable",
                            confounders=~1, data=.data,
                            pro.time=pro.time, precision=ROC.precision)$auc
          },
-        ribs={
+         ribs={
           timeVector <- timeVector[timeVector<=pro.time]
           bsc <- sapply(1:length(timeVector), FUN = function(j)
           {
@@ -179,7 +193,7 @@ metrics <- function(formula, data, prediction.times, metric, pro.time=NULL, ROC.
           RET <- RET/diff(range(timeVector))
           RET <- as.matrix(RET)
         },
-        ribll={
+         ribll={
           timeVector <- timeVector[timeVector<=pro.time]
           bll <- sapply(1:length(timeVector), FUN = function(j)
           {

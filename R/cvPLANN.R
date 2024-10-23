@@ -154,11 +154,12 @@ cvPLANN <- function(formula, pro.time=NULL, data, cv=10,
   plann.best.measure <- function(prediction.matrix, formula, data, prediction.times){
     .times <- as.character(formula[[2]][2])
     .failures <- as.character(formula[[2]][3])
-    .pred <- as.matrix(as.data.frame(prediction.matrix))
     .outcome <- paste("Surv(", .times, ",", .failures, ")")
-    .predformula <- as.formula( paste(.outcome, "~", ".pred") )
-    return(metrics(formula = .predformula, data=data,
-                   prediction.times=prediction.times, pro.time=pro.time, metric="ci"))
+    .predformula <- as.formula(paste(.outcome, "~ 1")) 
+    return(metrics(formula = .predformula, prediction.matrix = 
+                    as.matrix(as.data.frame(prediction.matrix)),
+                   data=data, prediction.times=prediction.times,
+                   pro.time=pro.time, metric="ci"))
   }
   
   .measure<-sapply(.FitCV, plann.best.measure, formula = formula , data=data.plann, prediction.times=.time)

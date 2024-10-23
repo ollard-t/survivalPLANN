@@ -4,15 +4,19 @@ import(relsurv)
 
 importFrom("methods", "hasArg")
 
-importFrom("stats", "predict", "ave", "terms", "as.formula")
+importFrom("stats", "predict", "ave", "terms", "as.formula", "median", 
+           "quantile")
   
-importFrom("RISCA", "roc.net")
+importFrom("RISCA", "roc.time")
 
 importFrom("survivalNET", "expectedhaz")
   
 export(sPLANN)
 export(rsPLANN)
+export(metrics)
 
 S3method(predict, sPLANN)
 S3method(predict, rsPLANN)
 S3method(print, sPLANN)
+S3method(plot, sPLANN)
+S3method(plot, rsPLANN)
