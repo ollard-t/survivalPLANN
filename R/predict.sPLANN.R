@@ -62,7 +62,7 @@ predict.sPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
     
     predictions <- unname(cbind(rep(1, dim(predictions)[1]), predictions))
     colnames(predictions) = c("0",ints_names)
-    newtimes <- c("0",ints_names)
+    newtimes <- intervals
     
     }else{ 
       if(!is.vector(newtimes))stop("newtimes must be a vector")

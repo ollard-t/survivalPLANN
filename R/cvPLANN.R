@@ -123,6 +123,7 @@ cvPLANN <- function(formula, pro.time=NULL, data, cv=10,
     .pred.temp <- predict(.plann, newdata=newdata)
     .pred <- .pred.temp$predictions
     .time.plann <- .pred.temp$times
+
     
     if(!is.null(newtimes)) {
       .pred.plann <- cbind(rep(1, dim(.pred)[1]), .pred)
