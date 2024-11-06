@@ -6,6 +6,8 @@ importFrom("methods", "hasArg")
 
 importFrom("stats", "predict", "ave", "terms", "as.formula", "median", 
            "quantile")
+
+importFrom("graphics", "abline", "segments")
   
 importFrom("RISCA", "roc.time")
 

@@ -1,5 +1,5 @@
 
-predict.rsPLANN <- function(object, newdata = NULL, newtimes = NULL, ratetable, age, year, sex, ...)
+predict.rsPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
 {
   
   if( is.null(newdata) & is.null(newtimes))
@@ -8,22 +8,69 @@ predict.rsPLANN <- function(object, newdata = NULL, newtimes = NULL, ratetable, 
     
   {
     splann <- object$fitsurvivalnet
+    ratetable <- object$ratetable
     
-    if(is.null(newdata)) {data <- splann$data} else {data <- newdata}
+    all_terms <- attr(terms(object$formula), "term.labels")
+    
+    covnames <- names(as.data.frame(object$fitsurvivalnet$x))
+    
+    ratetable_terms <- grep("ratetable\\(", all_terms, value = TRUE)
+    extract_vars <- function(term) {
+      var_string <- sub("^[^\\(]+\\((.*)\\)$", "\\1", term)
+      vars <- trimws(unlist(strsplit(var_string, ",")))
+      return(vars)
+    }
+    
+    assign_ratetable_vars <- function(vars) {
+      age <- year <- sex <- NULL
+      for (var in vars) {
+        if (grepl("age = ", var)) {
+          age <- sub("age = ", "", var)
+        } else if (grepl("year = ", var)) {
+          year <- sub("year = ", "", var)
+        } else if (grepl("sex = ", var)) {
+          sex <- sub("sex = ", "", var)
+        }
+      }
+      unnamed_vars <- setdiff(vars, c(age, sex, year))
+      if (length(unnamed_vars) > 0) {
+        if (is.null(age) && length(unnamed_vars) >= 1) age <- unnamed_vars[1]
+        if (is.null(year) && length(unnamed_vars) >= 2) year <- unnamed_vars[2]
+        if (is.null(sex) && length(unnamed_vars) >= 3) sex <- unnamed_vars[3]
+      }
+      return(list(age = age, sex = sex, year = year))
+    }
+    
+    extract_vars <- function(term) {
+      var_string <- sub("^[^\\(]+\\((.*)\\)$", "\\1", term)
+      vars <- trimws(unlist(strsplit(var_string, ",")))
+      return(vars)
+    }
+    
+    ratetable_vars <- assign_ratetable_vars(unlist(lapply(ratetable_terms, extract_vars)))
+    
+    age <- ratetable_vars$age
+    year <- ratetable_vars$year
+    sex <- ratetable_vars$sex
+    
+    if(is.null(newdata)) {
+      
+      data <- splann$data
+    
+      }else{
+      
+        if(!is.data.frame(newdata)) stop("Argument 'newdata' must be a data frame")
+      
+        indic <- c(age,year,sex, covnames)  %in% names(newdata) 
+        if( sum(!indic) > 0 ) stop("Missing predictor in the data frame. 'newdata' also needs
+                                   'age', 'sex' and 'year' for the ratetable.")
+      
+        data <- newdata
+      }
     
     predO <- predict(object=splann, newdata=data, newtimes=splann$intervals)
     
     times <- predO$times
-    
-    #expectedhaz <- function(ratetable, age, year, sex, time) 
-    #{
-    #  time <- min(time, 1000000)
-    #  .year <- date.mdy(year+time)$year
-    
-    #  ratetable[as.character( min( floor((age+time)/365.24), max(as.numeric(names(ratetable[, "2000", "male"]))) ) ),
-    #           as.character( min( .year, max(as.numeric(names(ratetable["51", , "male"]))) ) ),
-    #           sex]
-    # }
     
     exphaz <- function(x,age,sex,year) { survivalNET::expectedhaz(ratetable, age=age, sex=sex, year=year, time=x)}
     
@@ -103,14 +150,22 @@ predict.rsPLANN <- function(object, newdata = NULL, newtimes = NULL, ratetable, 
     {
       idx <- findInterval(newtimes, times, left.open = TRUE)
       
-      distE <- distE[,pmin(idx,length(times-1))]
-      distP <- distP[,pmin(idx,length(times-1))]
-      Pcure <- Pcure[,pmin(idx,length(times-1))]
-      survP <- survP[,pmin(idx,length(times-1))]
-      survU <- survU[,pmin(idx,length(times-1))]
-      Pcure <- Pcure[,pmin(idx,length(times-1))]
+      distO <- as.data.frame( distO[,pmin(idx,length(times-1))] )
+      distE <- as.data.frame( distE[,pmin(idx,length(times-1))] )
+      distP <- as.data.frame( distP[,pmin(idx,length(times-1))] )
+      Pcure <- as.data.frame( Pcure[,pmin(idx,length(times-1))] )
+      survP <- as.data.frame( survP[,pmin(idx,length(times-1))] )
+      survU <- as.data.frame( survU[,pmin(idx,length(times-1))] )
       times <- newtimes
-    }
+      
+      names(distO) <- times
+      names(distE) <- times
+      names(distP) <- times
+      names(Pcure) <- times
+      names(survP) <- times
+      names(survU) <- times
+      
+          }
     
     res <- list(
       times = times,

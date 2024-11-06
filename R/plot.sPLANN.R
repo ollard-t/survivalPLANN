@@ -20,7 +20,6 @@ plot.sPLANN <- function(x, n.groups=5, pro.time=NULL, newdata=NULL, ...){
     cova <- data.frame(newdata[,gsub("\\+", "", attr(terms(x$formula), "term.labels"))])
     time <- newdata[,as.character(x$formula[[2]][2])]
     event <- newdata[,as.character(x$formula[[2]][3])]
-    .age <- newdata[,.age]; .sex <- newdata[,.sex]; .year <- newdata[,.year]
   }
   
   .pred <- predict(x, newdata=cova, newtimes=pro.time)$predictions
@@ -61,7 +60,7 @@ plot.sPLANN <- function(x, n.groups=5, pro.time=NULL, newdata=NULL, ...){
   if(hasArg(ylim)==FALSE) {ylim <- c(0,1)} else {ylim <- list(...)$ylim}
   if(hasArg(xlim)==FALSE) {xlim  <- c(0,1)} else {xlim <- list(...)$xlim}
   
-  if(hasArg(ylab)==FALSE) {ylab <- "sPLANN estimation"} else {ylab <- list(...)$ylab}
+  if(hasArg(ylab)==FALSE) {ylab <- "sPLANN estimations"} else {ylab <- list(...)$ylab}
   if(hasArg(xlab)==FALSE) {xlab <- "Kaplan-Meier estimations"} else {xlab <- list(...)$xlab}
   if(hasArg(main)==FALSE) {main <- ""} else {main <- list(...)$main}
   

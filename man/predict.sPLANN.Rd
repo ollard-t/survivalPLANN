@@ -32,7 +32,7 @@ This function produces survival prediction from a neural network based on the PL
 \examples{
 data(dataK)
 
-splann <- sPLANN(Surv(time, event) ~ sex + stade + delay, data=dataK, inter=365, 
+splann <- sPLANN(Surv(time, event) ~ sex + stade + delay, data=dataK, inter=365.241, 
                           size=32, decay=0.01, maxit=200, MaxNWts=10000)
 
 dnew <- data.frame(sex=c(1,2), delay=c(0,0), stade=c(0,0))
@@ -41,9 +41,9 @@ pred <- predict(splann, newdata = dnew)
 
 # Predictions for a men or a women with no delay at the diagnostic of non-agressive cancer
 
-plot(c(0,pred$times/365.241), c(1,pred$predictions[1,]), ylab="Patient survival",
+plot(c(0:13*365.241, 5027.15), c(pred$predictions[1,]), ylab="Patient survival",
   xlab="Post-diagnosis time in years", type="l")
-lines(c(0,pred$times/365.241), c(1,pred$predictions[2,]), type="l", col=2)
+lines(c(0:13*365.241, 5027.15), c(pred$predictions[2,]), type="l", col=2)
 }
 
 \keyword{Predicting}

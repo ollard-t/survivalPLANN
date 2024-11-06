@@ -1,6 +1,6 @@
 
 predict.sPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
-{ ### RAJOUTER LES ... APRES LE RAW DANS LE PREDICT
+{ 
 
   intervals = object$intervals
   formula = object$formula
@@ -35,7 +35,7 @@ predict.sPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
                               FUN = seq_along)
   
   
-  predictions <- predict(object$fitsurvivalnet, newdata = data_dupli, newtimes = intervals,  type ="raw")
+  predictions <- predict(object$fitsurvivalnet, newdata = data_dupli, newtimes = intervals,  type ="raw", ...)
 
   grouped_df <- split(cbind(data_dupli,predictions),
                      rep(1:ceiling(nrow(data_dupli)/(length(intervals)-1)),

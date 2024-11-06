@@ -27,6 +27,7 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   formula_string <- as.character(formula)
   rhs <- gsub("\\+ ratetable\\(.*?\\)", "", formula_string[3]) 
   formula_string <- paste(formula_string[2], "~", rhs)
+  formula_w_ratetable <- formula
   formula <- as.formula(formula_string)
   extract_vars <- function(term) {
     var_string <- sub("^[^\\(]+\\((.*)\\)$", "\\1", term)
@@ -122,7 +123,7 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   estimPcure <- (round(distPinf + distEinf, 10) == 1)
   
   survP <- cbind(rep(1, N), exp(-t(as.matrix(cumsum(data.frame(t(hinstP)))))))
-  survU <- cbind(rep(1, N), exp(-t(as.matrix(cumsum(data.frame(t(       )))))))
+  survU <- cbind(rep(1, N), exp(-t(as.matrix(cumsum(data.frame(t(hinstE)))))))
   
   Pcure <- distPinf / (distPinf + (1-distPinf) * survU)
   
@@ -140,7 +141,7 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   
   # warning -> NA pour tCure ...
   
-  res <- list(formula = formula,
+  res <- list(formula = formula_w_ratetable,
               data = data,
               ratetable = ratetable,
               ays = data.frame(age = age, year = year, sex = sex),

@@ -43,16 +43,16 @@ model <- sPLANN(Surv(time, event) ~ biomarker + sex + stade + delay
 
 par(mfrow=c(2, 2))
 
-plot(model, n.groups=4, pro.time=2*365.24,
+plot(model, n.groups=2, pro.time=2*365.24,
   main="Predction at 2 years")
 
-plot(model, n.groups=4, pro.time=4*365.24, 
+plot(model, n.groups=2, pro.time=4*365.24, 
   main="Predction at 4 years")
 
-plot(model, n.groups=4, pro.time=6*365.24, 
+plot(model, n.groups=2, pro.time=6*365.24, 
   main="Predction at 6 years")
 
-plot(model, n.groups=4, pro.time=8*365.24, 
+plot(model, n.groups=2, pro.time=8*365.24, 
   main="Predction at 8 years")
 }
 

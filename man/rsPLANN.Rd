@@ -20,7 +20,7 @@ right. The response must be a survival object as returned by the \code{Surv} fun
 side, it is necessary to specify a '+\code{ratetable}(age = age, year = year, sex = sex)' term. The
 time must be in days.}
 \item{data}{A data frame in which to look for the variables included in the \code{formula}.}
-\\item{pro.time}{A numeric value with the maximum prognostic time in days. If \code{NULL}, the maximum prognostic time is the last time for wich an event is observed.}
+\item{pro.time}{A numeric value with the maximum prognostic time in days. If \code{NULL}, the maximum prognostic time is the last time for wich an event is observed.}
 \item{inter}{A numeric value representing the length of the intervals.}
 \item{size}{A numeric value for the number of units in the hidden layer. Default is set to 32}
 \item{decay}{A numeric value for the parameter for weight decay. Default is set to 0.01}
@@ -63,21 +63,17 @@ analysis of censored survival data: a partial logistic regression approach. Stat
 data(dataK)
 data(fr.ratetable)
 
-rs1 <- rsPLANN(Surv(time, event) ~ stade + delay + sex +  biomarker + ratetable(age=age, year = 
-year, sex=sexchara), data = dataK[1:200,],
-               pro.time = 365.241*20, inter=365.241, size = 16, decay = 0.01,
-               maxit = 100, MaxNWts=10000, ratetable=fr.ratetable,
+rs1 <- rsPLANN(Surv(time, event) ~ stade + delay + sex +  biomarker + ratetable(age=age,                year = year, sex=sexchara), data = dataK[1:200,],
+               pro.time = 365.241*6, inter=365.241, size = 16, decay = 0.01,
+               maxit = 100, MaxNWts=10000, ratetable=fr.ratetable
                )
 
-mdistE <- apply(rs1$predictions$CIFc, FUN=mean, MARGIN=2)
-mdistP <- apply(rs1$predictions$CIFp, FUN=mean, MARGIN=2)
-
-plot(rs1$predictions$times/365.241, mdistE,
+plot(rs1$times/365.241, rs1$mpredictions$CIF_C,
 xlab="Post-diagnostic time (years)",
      ylab="Cumulative incidence functions",
      ylim=c(0,1), col="red", type="s",)
 
-lines(rs1$predictions$times/365.241, mdistP, type="s", col="blue")
+lines(rs1$times/365.241, rs1$mpredictions$CIF_P, type="s", col="blue")
 
 legend("topleft", legend=c("Cancer-related death", "Death due to other causes"), col=c("red", 
 "blue"), lty=c(1,1))
