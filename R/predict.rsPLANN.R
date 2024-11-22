@@ -3,7 +3,8 @@ predict.rsPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
 {
   
   if( is.null(newdata) & is.null(newtimes))
-  {     res <- list(times = object$times, predictions = object$ipredictions) 
+  {     res <- list(times = object$times, ipredictions = object$ipredictions,
+                    mpredictions = object$mpredictions) 
   } else 
     
   {
@@ -169,9 +170,9 @@ predict.rsPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
     
     res <- list(
       times = times,
-      ipredictions = list(survival_P=survP,
-                          survival_O=1-distO,
-                          #survival_R=(1-distO)/survP,
+      ipredictions = list(survival_O=1-distO,
+                          survival_P=survP,
+                          survival_R=(1-distO)/survP,
                           survival_E=survU, # remarque : S(1-distO)/survP = survU
                           CIF_C = distE, CIF_P = distP, maxCIF_P = distPinf,
                           cure = Pcure),
