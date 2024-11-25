@@ -89,7 +89,7 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   
   for (i in 1:N)
   {
-    if(sum(survO[i,]==0)>0)
+    if(sum(is.na(survO[i,]))>0)
     {
       hinstO[i,is.na(hinstO[i,])] <- hinstO[i,!is.na(hinstO[i,])][sum(!is.na(hinstO[i,]))]
     }
@@ -141,6 +141,9 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   
   # warning -> NA pour tCure ...
   
+  # loglik <- sum(splann$fitsurvivalnet$y[,2]*log(hinstO)+log(1-distO))
+  loglik <- log(prod(hinstO^(splann$fitsurvivalnet$y[,2])*(1-distO) ))
+  
   res <- list(formula = formula_w_ratetable,
               data = data,
               ratetable = ratetable,
@@ -148,6 +151,7 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
               pro.time = pro.time,
               fitsurvivalnet = splann,
               times = times,
+              loglik = loglik,
               ipredictions = list(survival_O=1-distO,
                                   survival_P=survP,
                                   survival_R=(1-distO)/survP,
