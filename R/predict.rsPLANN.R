@@ -149,6 +149,12 @@ predict.rsPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
     
     if(!is.null(newtimes)) # @Thomas : merci de vérifier que je renvois les bonnes valeurs dans cette condition -> voir plot dans l'exemple du fichier Rd
     {
+      newtimes <- unique(newtimes)      
+      
+      if(0 %in% newtimes){
+        newtimes <- sort(newtimes[-(newtimes == 0)])
+        warning("To assure stability in the function, 0 was removed from the newtimes.")
+      }
       idx <- findInterval(newtimes, times, left.open = TRUE)
       
       distO <- as.data.frame( distO[,pmin(idx,length(times-1))] )

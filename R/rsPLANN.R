@@ -141,8 +141,15 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   
   # warning -> NA pour tCure ...
   
-  # loglik <- sum(splann$fitsurvivalnet$y[,2]*log(hinstO)+log(1-distO))
-  loglik <- log(prod(hinstO^(splann$fitsurvivalnet$y[,2])*(1-distO) ))
+  event_time <- findInterval(splann$y[,1], splann$interval,left.open = TRUE)
+  ind_hinstO <- sapply(1:(dim(splann$x)[1]), function(i) {
+    hinstO[i, event_time[i]]
+  })
+  ind_survO <-  sapply(1:(dim(splann$x)[1]), function(i) {
+    (1-distO)[i, event_time[i]]
+  })
+
+    loglik <- sum(splann$y[,2]*log(ind_hinstO)+log(ind_survO))
   
   res <- list(formula = formula_w_ratetable,
               data = data,
