@@ -141,15 +141,19 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   
   # warning -> NA pour tCure ...
   
-  event_time <- findInterval(splann$y[,1], splann$interval,left.open = TRUE)
-  ind_hinstO <- sapply(1:(dim(splann$x)[1]), function(i) {
-    cbind(rep(0, N),hinstO)[i, event_time[i]]
-  })
-  ind_survO <-  sapply(1:(dim(splann$x)[1]), function(i) {
-    (1-distO)[i, event_time[i]]
-  })
-
-    loglik <- sum(splann$y[,2]*log(ind_hinstO)+log(ind_survO))
+  # si le pro.time est plus petit que le dernier temps de la base, 
+  # on a probleme d'indice car findInterval va mettre les temps plus grands dans un n+1ème intervalle
+  # que donc hinstO n'a pas
+  #
+  # event_time <- findInterval(splann$y[,1], splann$interval,left.open = TRUE)
+  # ind_hinstO <- sapply(1:(dim(splann$x)[1]), function(i) {
+  #   hinstO[i, event_time[i]]
+  # })
+  # ind_survO <-  sapply(1:(dim(splann$x)[1]), function(i) {
+  #   (1-distO)[i, event_time[i]]
+  # })
+  # 
+  #   loglik <- sum(splann$y[,2]*log(ind_hinstO)+log(ind_survO))
   
   res <- list(formula = formula_w_ratetable,
               data = data,
@@ -158,7 +162,7 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
               pro.time = pro.time,
               fitsurvivalnet = splann,
               times = times,
-              loglik = loglik,
+              # loglik = loglik,
               ipredictions = list(survival_O=1-distO,
                                   survival_P=survP,
                                   survival_R=(1-distO)/survP,
