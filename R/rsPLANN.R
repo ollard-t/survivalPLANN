@@ -143,7 +143,7 @@ rsPLANN <- function(formula, data, pro.time=NULL, inter, size= 32, decay=0.01,
   
   event_time <- findInterval(splann$y[,1], splann$interval,left.open = TRUE)
   ind_hinstO <- sapply(1:(dim(splann$x)[1]), function(i) {
-    hinstO[i, event_time[i]]
+    cbind(rep(0, N),hinstO)[i, event_time[i]]
   })
   ind_survO <-  sapply(1:(dim(splann$x)[1]), function(i) {
     (1-distO)[i, event_time[i]]
