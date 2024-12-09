@@ -3,7 +3,8 @@ predict.rsPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
 {
   
   if( is.null(newdata) & is.null(newtimes))
-  {     res <- list(times = object$times, predictions = object$ipredictions) 
+  {     res <- list(times = object$times, ipredictions = object$ipredictions,
+                    mpredictions = object$mpredictions) 
   } else 
     
   {
@@ -148,6 +149,12 @@ predict.rsPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
     
     if(!is.null(newtimes)) # @Thomas : merci de vérifier que je renvois les bonnes valeurs dans cette condition -> voir plot dans l'exemple du fichier Rd
     {
+      newtimes <- unique(newtimes)      
+      
+      if(0 %in% newtimes){
+        newtimes <- sort(newtimes[-(newtimes == 0)])
+        warning("To assure stability in the function, 0 was removed from the newtimes.")
+      }
       idx <- findInterval(newtimes, times, left.open = TRUE)
       
       distO <- as.data.frame( distO[,pmin(idx,length(times-1))] )
@@ -169,9 +176,9 @@ predict.rsPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
     
     res <- list(
       times = times,
-      ipredictions = list(survival_P=survP,
-                          survival_O=1-distO,
-                          #survival_R=(1-distO)/survP,
+      ipredictions = list(survival_O=1-distO,
+                          survival_P=survP,
+                          survival_R=(1-distO)/survP,
                           survival_E=survU, # remarque : S(1-distO)/survP = survU
                           CIF_C = distE, CIF_P = distP, maxCIF_P = distPinf,
                           cure = Pcure),

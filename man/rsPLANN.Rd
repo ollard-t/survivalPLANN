@@ -39,15 +39,24 @@ increasing MaxNWts will probably allow fits that are very slow and time-consumin
 \item{pro.time}{The maximum prognostic time.}
 \item{fitsurvivalnet}{The fitted \code{nnet} object.}
 \item{times}{A vector with the \code{P} prognostic times up to \code{pro.time}}
-\item{ipredictions}{A list with the predicted outcomes for the \code{N} individals in \code{data}: 
-\code{CIFc} is a 
-\code{N x P} matrix with the cummulative probabilities of death caused by the disease, \code{FCIFp} 
-is a \code{N x P} matrix with the cummulative probabilities of death of the reference population in 
-\code{ratetable}, \code{tPcure} is a \code{N x P} matrix with the probabilities of being cured 
-conditionnaly to be alive at the progostic times, \code{aPcure} is a vector with (asymptotic) 
-probabilty of being cured, \code{Sc} is the survival among uncured patients (i.e. given the
-mortality is all releted to the disease), and Sp is the survival among cured patients (as in the 
-reference population).}
+\item{ipredictions}{A list with the predicted outcomes for the \code{N} individals in \code{data}:
+\code{survival_O} is the observed survival, \code{survival_P} is the population survival, i.e the 
+survival of the individuals for individuals with the same caracteristics in the ratetable, 
+\code{survivalR} is the relative survival and \code{survivalE} is the net survival. \code{CIF_C} is 
+a \code{NxP} matrix with the cumulative probabilities of death caused by the disease, \code{CIF_P}
+is a \code{NxP} matrix with the cumulative probabilities of death of the reference population in 
+\code{ratetable}, \code{maxCIF_P} is a vector with (asymptotic) probabilty of being cured, 
+\code{cure} is a \code{NxP} matrix with the probabilities of being cured conditionnaly to be alive 
+at the progostic times.}
+\item{mpredictions}{A list with the mean predicted outcomes : 
+\code{survival_O} is the mean observed survival, \code{survival_P} is the mean population survival, 
+i.e the survival of the individuals for individuals with the same caracteristics in the ratetable, 
+\code{survivalR} is the mean relative survival and \code{survivalE} is the mean net survival. 
+\code{CIF_C} is a vector with the mean cumulative probabilities of death caused by the disease,
+\code{CIF_P} is a vector with the mean cumulative probabilities of death of the reference population
+in \code{ratetable}. \code{cure} is a vector with the mean probabilities of being cured 
+conditionnaly to be alive at the progostic times. \code{hazard_P} is the mean instaneous hazard in 
+the population and \code{hazard_C} is the mean instaneous hazard in excess.}
 }
 
 \details{
