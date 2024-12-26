@@ -1,7 +1,7 @@
 
-cvPLANN <- function(formula, pro.time=NULL, data, cv=10, 
-                             inter, size = 32, decay = 0.01,
-                    maxit =100, MaxNWts=10000){
+cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=1, size = 8, decay = 0.01,
+                    maxit = 1000, MaxNWts=10000)
+{
   
   ####### check errors
   if (missing(formula)) stop("a formula argument is required")
