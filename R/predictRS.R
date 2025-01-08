@@ -1,5 +1,5 @@
 
-predictRS <- function(object, data, ratetable, age, year, sex)
+predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
 {
 
   if (missing(object)) stop("an object of the class sPLANN is required")
@@ -141,9 +141,51 @@ predictRS <- function(object, data, ratetable, age, year, sex)
       #SPlP <- survP[,1:(P-1)] * hinstP
       #sumSPlP <- apply(SlP, FUN="sum", MARGIN=2)
       
+      
+      if(!is.null(newtimes)) 
+        {
+        newtimes <- unique(newtimes)      
+        
+        if(0 %in% newtimes){
+          newtimes <- sort(newtimes[-(newtimes == 0)])
+          warning("To assure stability in the function, 0 was removed from the newtimes.")
+        }
+        idx <- findInterval(newtimes, times, left.open = TRUE)
+        
+        ipredictions$overall_survival <- as.data.frame( ipredictions$overall_survival[,pmin(idx,length(times-1))] )
+        ipredictions$overall_hazard <- as.data.frame( ipredictions$overall_hazard[,pmin(idx,length(times-1))] )
+        ipredictions$population_survival <- as.data.frame( ipredictions$population_survival[,pmin(idx,length(times-1))] )
+        ipredictions$population_hazard <- as.data.frame( ipredictions$population_hazard[,pmin(idx,length(times-1))] )
+        ipredictions$relative_survival <- as.data.frame( ipredictions$relative_survival[,pmin(idx,length(times-1))] )
+        ipredictions$relative_hazard <- as.data.frame( ipredictions$relative_hazard[,pmin(idx,length(times-1))] )
+        ipredictions$population_cif <- as.data.frame( ipredictions$population_cif[,pmin(idx,length(times-1))] )
+        ipredictions$excess_cif <- as.data.frame( ipredictions$excess_cif[,pmin(idx,length(times-1))] )
+        
+        overall_survival <- overall_survival[pmin(idx,length(times-1))] 
+        overall_hazard <- overall_hazard[pmin(idx,length(times-1))] 
+        population_survival <- population_survival[pmin(idx,length(times-1))] 
+        population_hazard <- population_hazard[pmin(idx,length(times-1))] 
+        observable_net_hazard <- observable_net_hazard[pmin(idx,length(times-1))] 
+        observable_net_survival <- observable_net_survival[pmin(idx,length(times-1))] 
+        relative_ratio_hazard <- relative_ratio_hazard[pmin(idx,length(times-1))] 
+        relative_ratio_survival <- relative_ratio_survival[pmin(idx,length(times-1))] 
+        net_hazard <- net_hazard[pmin(idx,length(times-1))] 
+        net_survival <- net_survival[pmin(idx,length(times-1))] 
+        excess_cif <- excess_cif[pmin(idx,length(times-1))] 
+        population_cif <- population_cif[pmin(idx,length(times-1))] 
+       
+        
+        times <- newtimes
+        
+      }
+      
+      
+      
       res <- list(
         nnet = splann,
         times = 0:max(times),
+        ays = splann$data[,c(age, year, sex)],
+        ratetable = ratetable,
         #    max_cif = list(asymptotic = estimPcure,
         #                   population = distPinf,
         #                   excess = distEinf),
@@ -173,6 +215,6 @@ predictRS <- function(object, data, ratetable, age, year, sex)
           #      cure = apply(Pcure, FUN="mean", MARGIN=2)
         )
       )
-      
+      class(res) <- "predictRS"
       return(res)
 }
