@@ -41,7 +41,7 @@ splann <- sPLANN(Surv(time, event)~ sex + agey + stade + delay, data=dataK,
 
 data("fr.ratetable") # import the table with the expected population mortality
 
-# predictions of the relative survival for the first 5 patients
+# predictions of the relative survival for the first 10 patients
 #datap <- predictRS(object=splann, data=dataK[1:10,],
 #                 ratetable=fr.ratetable, age="age", sex="sexchara", year="year")
                  
