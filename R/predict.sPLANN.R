@@ -19,7 +19,7 @@ predict.sPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
 
   data_dupli <- newdata[, attr(terms(formula), "term.labels"), drop = FALSE ]
   data_dupli <- as.data.frame(data_dupli[rep(seq_len(nrow(data_dupli)), each = length(intervals)-1),])
-  if(length(attr(terms(formula), "term.labels") == 1 && attr(terms(formula), "term.labels") != "1" )){
+  if(length(attr(terms(formula), "term.labels") ) == 1 && attr(terms(formula), "term.labels") != "1" ){
     names(data_dupli) <- attr(terms(formula), "term.labels")
     
     orig_row_ids <- seq_len(nrow(newdata))  
