@@ -5,7 +5,7 @@ predict.sPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
   intervals = object$intervals
   formula = object$formula
   time = object$y[,1]
-  
+  pro.time = object$pro.time
   if(!is.null(newdata))
   {
     if(!is.data.frame(newdata)) stop("Argument 'newdata' must be a data frame")
@@ -19,7 +19,7 @@ predict.sPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
 
   data_dupli <- newdata[, attr(terms(formula), "term.labels"), drop = FALSE ]
   data_dupli <- as.data.frame(data_dupli[rep(seq_len(nrow(data_dupli)), each = length(intervals)-1),])
-  if(length(attr(terms(formula), "term.labels") == 1 && attr(terms(formula), "term.labels") != "1" )){
+  if(length(attr(terms(formula), "term.labels") ) == 1 && attr(terms(formula), "term.labels") != "1" ){
     names(data_dupli) <- attr(terms(formula), "term.labels")
     
     orig_row_ids <- seq_len(nrow(newdata))  
@@ -66,12 +66,14 @@ predict.sPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
     
     }else{ 
       if(!is.vector(newtimes))stop("newtimes must be a vector")
-      if(any(max(time)<newtimes))warning("One or more values of 'newtimes' are  greater than the max(time) of event in your training data base. All predictions for those times are supposed to be NA.") #modif
+      if(any(max(time, pro.time)<newtimes))warning("One or more values of 'newtimes' are  greater than the prognostic time . All predictions for those times are supposed to be NA.") #modif
       if(0 %in% newtimes){
         newtimes <- sort(newtimes[-(newtimes == 0)])
       }
-      usable_times <- newtimes[newtimes <= max(time[object$y[,2] == 1])]
-      out_time <- newtimes[newtimes > max(time[object$y[,2] == 1])]
+      # usable_times <- newtimes[newtimes <= max(time[object$y[,2] == 1])]
+      # out_time <- newtimes[newtimes > max(time[object$y[,2] == 1])]
+      usable_times <- newtimes[newtimes <= pro.time]
+      out_time <- newtimes[newtimes > pro.time]
       idx <- findInterval(usable_times, intervals, left.open = TRUE)
       predictions <- as.data.frame(predictions[,pmin(idx,length(intervals-1))])
       col_names <- paste0(usable_times," in ",ints_names[idx])

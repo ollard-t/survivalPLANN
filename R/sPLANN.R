@@ -35,6 +35,7 @@ sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
   #### making of intervals from PLANN
   
   if (is.null(pro.time)) {pro.time <- max(time[event==1])} # modif
+  # if (is.null(pro.time)) {pro.time <- max(time)} # modif 
   
   intervals <- unique(c(0, seq(inter, pro.time, by=inter), pro.time)) # modif
   
@@ -67,8 +68,7 @@ sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
   if( length( attr( terms(formula), "term.labels" ) )  == 0){
     formulaInt = as.formula(paste(as.character(formula[[2]][3]),"~",
                                   " Intervals"))
-  }
-else{
+  }else{ #chgt
   formulaInt = as.formula(paste(as.character(formula[[2]][3]),"~", 
                           paste(attr(terms(formula), "term.labels"),
                           collapse = " + "),
@@ -100,6 +100,7 @@ else{
               y = cbind(time = time, status = event),
               x = cova,
               intervals = intervals,
+              pro.time = pro.time, #pour calcul logll predictRS
               missing = !na
               )
   class(res) <- "sPLANN"
