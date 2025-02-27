@@ -13,6 +13,14 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   if (length(dim(ratetable))!=3) stop("The life table must have 3 dimensions: age, year, sex")
   if (dim(ratetable)[3]!=2) stop("The life table must have 3 dimensions: age, year, sex")
   
+  covnames <- colnames(object$x)
+  .age <- age
+  .year <- year
+  .sex <- sex
+  indic <- c(as.character(object$formula[[2]][2]), as.character(object$formula[[2]][3]),
+             covnames,.age, .year, .sex) %in% names(data) 
+  if( sum(!indic) > 0 ) stop("Missing predictor in the new data frame")
+      
       splann <- object
   
       predO <- predict(object=splann, newdata=data, newtimes=splann$intervals)
@@ -60,17 +68,17 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
                             population_cif=.temp, excess_cif=.temp)
       
       for (i in 1:N)
-      {
+      { 
         temp0 <- data.frame(hinstO = hinstO[i, ], hinstE = hinstE[i, ], hinstP = hinstP[i, ],
                             times0 = times[-P], times1 = times[-1], interval=1:length(times[-P]))
         
-        find.it <- function(x) { return(temp0$interval[x>temp0$times0 & x<=temp0$times1]) } #chgt dans l'ouverture des intervalles [:) -> (:] 
-
         temp1 <- data.frame(times = 1:max(times)) 
         
-        temp1$interval <- sapply(temp1$times, FUN="find.it")
-
-        temp2 <- merge(temp1, temp0, by="interval")
+        temp1$interval <- findInterval(temp1$times, temp0$times0)
+        
+        # temp2 <- merge(temp1, temp0, by="interval")
+        temp2 <- temp0[temp1$interval,]
+        temp2$times <- temp1$times
         
         temp2$overall_survival<- exp(-cumsum(temp2$hinstO))
         temp2$population_survival<- exp(-cumsum(temp2$hinstP))
@@ -83,7 +91,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         temp2$population_cif <- cumsum(temp2$overall_survival * temp2$hinstP) # p464 - subsection 2.1 - 2nd equation (Mozumder et al. 2017)
         temp2$excess_cif <- cumsum(temp2$overall_survival * temp2$hinstE) # p464 - subsection 2.1 - 2nd equation (Mozumder et al. 2017)
         
-        results[results$id==i, -1] <- temp2[, c("times",
+        results[results$id == i, -1] <- temp2[, c("times",
                                                 "overall_hazard", "population_hazard", "relative_hazard",
                                                 "overall_survival", "population_survival", "relative_survival",
                                                 "population_cif", "excess_cif")]
@@ -215,7 +223,9 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       res <- list(
         nnet = splann,
         times = 0:max(times),
-        ays = splann$data[,c(age, year, sex)],
+        x = data[,c(colnames(splann$x))],
+        y =  data[, c(as.character(splann$formula[[2]][2]), as.character(splann$formula[[2]][3]))],
+        ays = data[,c(age, year, sex)],
         ratetable = ratetable,
         loglik = loglik,
         #    max_cif = list(asymptotic = estimPcure,
