@@ -60,9 +60,9 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       
       hinstE <- hinstO - hinstP
       
-      .temp <- rep(-99, N * length(1:max(times)))
+      .temp <- rep(-99, N * (length(times)-1))
       
-      results <- data.frame(id=sort(rep(1:N, length(1:max(times)))), times = .temp,
+      results <- data.frame(id=sort(rep(1:N, (length(times)-1) )), times = .temp,
                             overall_hazard=.temp, population_hazard=.temp, relative_hazard=.temp,
                             overall_survival=.temp, population_survival=.temp, relative_survival=.temp,
                             population_cif=.temp, excess_cif=.temp)
@@ -72,24 +72,34 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         temp0 <- data.frame(hinstO = hinstO[i, ], hinstE = hinstE[i, ], hinstP = hinstP[i, ],
                             times0 = times[-P], times1 = times[-1], interval=1:length(times[-P]))
         
-        temp1 <- data.frame(times = 1:max(times)) 
+        temp1 <- data.frame(times = times[-1]) 
         
-        temp1$interval <- findInterval(temp1$times, temp0$times0)
-        
+        temp1$interval <- findInterval(temp1$times, temp0$times0, left.open = TRUE)
+
         # temp2 <- merge(temp1, temp0, by="interval")
         temp2 <- temp0[temp1$interval,]
         temp2$times <- temp1$times
         
-        temp2$overall_survival<- exp(-cumsum(temp2$hinstO))
-        temp2$population_survival<- exp(-cumsum(temp2$hinstP))
-        temp2$relative_survival <- exp(-cumsum(temp2$hinstE))
+        if(!is.null(newtimes)){
+          times2 = sort(c(newtimes,times))
+          row_index <- findInterval(newtimes, temp0$times0, left.open = TRUE)
+          new_row <- temp2[row_index, ]
+          new_row$times <- newtimes  
+          temp2 <- rbind(temp2, new_row)
+          temp2 <- temp2[order(temp2$times),]
+        }
+        mult <- diff(floor(c(0,temp2$times)))
         
-        temp2$overall_hazard <- temp2$hinstO
-        temp2$population_hazard <- temp2$hinstP
-        temp2$relative_hazard <- temp2$hinstE
+        temp2$overall_survival<- exp(-cumsum(mult*temp2$hinstO))
+        temp2$population_survival<- exp(-cumsum(mult*temp2$hinstP))
+        temp2$relative_survival <- exp(-cumsum(mult*temp2$hinstE))
         
-        temp2$population_cif <- cumsum(temp2$overall_survival * temp2$hinstP) # p464 - subsection 2.1 - 2nd equation (Mozumder et al. 2017)
-        temp2$excess_cif <- cumsum(temp2$overall_survival * temp2$hinstE) # p464 - subsection 2.1 - 2nd equation (Mozumder et al. 2017)
+        temp2$overall_hazard <- mult*temp2$hinstO
+        temp2$population_hazard <- mult*temp2$hinstP
+        temp2$relative_hazard <- mult*temp2$hinstE
+        
+        temp2$population_cif <- cumsum(mult*temp2$overall_survival * temp2$hinstP) # p464 - subsection 2.1 - 2nd equation (Mozumder et al. 2017)
+        temp2$excess_cif <- cumsum(mult*temp2$overall_survival * temp2$hinstE) # p464 - subsection 2.1 - 2nd equation (Mozumder et al. 2017)
         
         results[results$id == i, -1] <- temp2[, c("times",
                                                 "overall_hazard", "population_hazard", "relative_hazard",
@@ -98,14 +108,14 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       }
       
       ipredictions <- list(
-        overall_survival = matrix(results$overall_survival, ncol=length(1:max(times)), byrow = TRUE),
-        overall_hazard =  matrix(results$overall_hazard, ncol=length(1:max(times)), byrow = TRUE),
-        population_survival = matrix(results$population_survival, ncol=length(1:max(times)), byrow = TRUE),
-        population_hazard = matrix(results$population_hazard, ncol=length(1:max(times)), byrow = TRUE),
-        relative_survival = matrix(results$relative_survival, ncol=length(1:max(times)), byrow = TRUE),
-        relative_hazard = matrix(results$relative_hazard, ncol=length(1:max(times)), byrow = TRUE),
-        population_cif = matrix(results$population_cif, ncol=length(1:max(times)), byrow = TRUE), 
-        excess_cif = matrix(results$excess_cif, ncol=length(1:max(times)), byrow = TRUE)
+        overall_survival = matrix(results$overall_survival, ncol=length(times[-1]), byrow = TRUE),
+        overall_hazard =  matrix(results$overall_hazard, ncol=length(times[-1]), byrow = TRUE),
+        population_survival = matrix(results$population_survival, ncol=length(times[-1]), byrow = TRUE),
+        population_hazard = matrix(results$population_hazard, ncol=length(times[-1]), byrow = TRUE),
+        relative_survival = matrix(results$relative_survival, ncol=length(times[-1]), byrow = TRUE),
+        relative_hazard = matrix(results$relative_hazard, ncol=length(times[-1]), byrow = TRUE),
+        population_cif = matrix(results$population_cif, ncol=length(times[-1]), byrow = TRUE), 
+        excess_cif = matrix(results$excess_cif, ncol=length(times[-1]), byrow = TRUE)
       )
       
       .numerator <- apply(ipredictions$overall_survival, FUN="sum", MARGIN=2)
