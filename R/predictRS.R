@@ -20,6 +20,8 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   indic <- c(as.character(object$formula[[2]][2]), as.character(object$formula[[2]][3]),
              covnames,.age, .year, .sex) %in% names(data) 
   if( sum(!indic) > 0 ) stop("Missing predictor in the new data frame")
+  
+  if(!is.null(newtimes) & 0 %in% newtimes)stop("Error : 0 found in 'newtimes'. For stablity of the function, 0 can't be in 'newtimes'.")
       
       splann <- object
   
@@ -60,12 +62,23 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       
       hinstE <- hinstO - hinstP
       
-      .temp <- rep(-99, N * (length(times)-1))
+      if(is.null(newtimes)){
+        
+        .temp <- rep(-99, N * (length(times)-1))
       
-      results <- data.frame(id=sort(rep(1:N, (length(times)-1) )), times = .temp,
+        results <- data.frame(id=sort(rep(1:N, (length(times)-1) )), times = .temp,
                             overall_hazard=.temp, population_hazard=.temp, relative_hazard=.temp,
                             overall_survival=.temp, population_survival=.temp, relative_survival=.temp,
                             population_cif=.temp, excess_cif=.temp)
+      }else{
+        
+        .temp <- rep(-99, N * (length(times)-1+length(newtimes)))
+        
+        results <- data.frame(id=sort(rep(1:N, (length(times)-1+length(newtimes)) )), times = .temp,
+                              overall_hazard=.temp, population_hazard=.temp, relative_hazard=.temp,
+                              overall_survival=.temp, population_survival=.temp, relative_survival=.temp,
+                              population_cif=.temp, excess_cif=.temp)
+      }
       
       for (i in 1:N)
       { 
@@ -81,7 +94,6 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         temp2$times <- temp1$times
         
         if(!is.null(newtimes)){
-          times2 = sort(c(newtimes,times))
           row_index <- findInterval(newtimes, temp0$times0, left.open = TRUE)
           new_row <- temp2[row_index, ]
           new_row$times <- newtimes  
@@ -94,9 +106,9 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         temp2$population_survival<- exp(-cumsum(mult*temp2$hinstP))
         temp2$relative_survival <- exp(-cumsum(mult*temp2$hinstE))
         
-        temp2$overall_hazard <- mult*temp2$hinstO
-        temp2$population_hazard <- mult*temp2$hinstP
-        temp2$relative_hazard <- mult*temp2$hinstE
+        temp2$overall_hazard <- temp2$hinstO
+        temp2$population_hazard <- temp2$hinstP
+        temp2$relative_hazard <- temp2$hinstE
         
         temp2$population_cif <- cumsum(mult*temp2$overall_survival * temp2$hinstP) # p464 - subsection 2.1 - 2nd equation (Mozumder et al. 2017)
         temp2$excess_cif <- cumsum(mult*temp2$overall_survival * temp2$hinstE) # p464 - subsection 2.1 - 2nd equation (Mozumder et al. 2017)
@@ -108,41 +120,43 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       }
       
       ipredictions <- list(
-        overall_survival = matrix(results$overall_survival, ncol=length(times[-1]), byrow = TRUE),
-        overall_hazard =  matrix(results$overall_hazard, ncol=length(times[-1]), byrow = TRUE),
-        population_survival = matrix(results$population_survival, ncol=length(times[-1]), byrow = TRUE),
-        population_hazard = matrix(results$population_hazard, ncol=length(times[-1]), byrow = TRUE),
-        relative_survival = matrix(results$relative_survival, ncol=length(times[-1]), byrow = TRUE),
-        relative_hazard = matrix(results$relative_hazard, ncol=length(times[-1]), byrow = TRUE),
-        population_cif = matrix(results$population_cif, ncol=length(times[-1]), byrow = TRUE), 
-        excess_cif = matrix(results$excess_cif, ncol=length(times[-1]), byrow = TRUE)
+        overall_survival = matrix(results$overall_survival, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
+        overall_hazard =  matrix(results$overall_hazard, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
+        population_survival = matrix(results$population_survival, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
+        population_hazard = matrix(results$population_hazard, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
+        relative_survival = matrix(results$relative_survival, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
+        relative_hazard = matrix(results$relative_hazard, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
+        population_cif = matrix(results$population_cif, ncol=length(times[-1])+length(newtimes), byrow = TRUE), 
+        excess_cif = matrix(results$excess_cif, ncol=length(times[-1])+length(newtimes), byrow = TRUE)
       )
       
       .numerator <- apply(ipredictions$overall_survival, FUN="sum", MARGIN=2)
       
       # equation 6 in Biometrics (2012)
       observable_net_hazard <- apply(ipredictions$overall_survival * ipredictions$relative_hazard, FUN="sum", MARGIN=2) / .numerator
-      observable_net_survival <- exp(-cumsum(observable_net_hazard))
+      observable_net_survival <- exp(-cumsum(mult*observable_net_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
       
       # equation 6 in Biometrics (2012) & lambda_P in JSS (2018)
       population_hazard  <- apply(ipredictions$overall_survival * ipredictions$population_hazard, FUN="sum", MARGIN=2) / .numerator
-      population_survival <- exp(-cumsum(population_hazard))
+      population_survival <- exp(-cumsum(mult*population_hazard)) ##pred très proche (3 chiffres après la virgule) de ce qu'on avait avant mais petite différence /!\
       
       # from the two previous equations (just after the equation 6 in Biometrics (2012))
       overall_hazard <- apply(ipredictions$overall_survival * ipredictions$overall_hazard, FUN="sum", MARGIN=2) / .numerator
-      overall_survival <- exp(-cumsum(overall_hazard))
+      overall_survival <- exp(-cumsum(mult*overall_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
       
       .numerator <- apply(ipredictions$relative_survival, FUN="sum", MARGIN=2)
       net_hazard <- apply(ipredictions$relative_survival * ipredictions$relative_hazard, FUN="sum", MARGIN=2) / .numerator
-      net_survival <- exp(-cumsum(net_hazard))
+      net_survival <- exp(-cumsum(mult*net_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
       
       .numerator <- apply(ipredictions$population_survival, FUN="sum", MARGIN=2)
       relative_ratio_hazard <- overall_hazard - 
         apply(ipredictions$population_survival * ipredictions$population_hazard, FUN="sum", MARGIN=2)  /  .numerator
-      relative_ratio_survival <- exp(-cumsum(relative_ratio_hazard))
+      relative_ratio_survival <- exp(-cumsum(mult*relative_ratio_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
       
-      excess_cif <- cumsum( overall_survival * observable_net_hazard) # equation end page 4 in JSS (2018)
-      population_cif <- cumsum( overall_survival * population_hazard) # equation end page 4 in JSS (2018)
+      excess_cif <- cumsum( mult*overall_survival * observable_net_hazard) # equation end page 4 in JSS (2018)
+      ##pred très proche de ce qu'on avait avant mais petite différence /!\
+      population_cif <- cumsum( mult*overall_survival * population_hazard) # equation end page 4 in JSS (2018)
+      ##pred très proche de ce qu'on avait avant mais petite différence /!\
       
       #population_cif[survO==1] <- 0
       #excess_cif[survO==1] <- 0
@@ -196,11 +210,11 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         {
         newtimes <- unique(newtimes)      
         
-        if(0 %in% newtimes){
-          newtimes <- sort(newtimes[-(newtimes == 0)])
-          warning("To assure stability in the function, 0 was removed from the newtimes.")
-        }
-        nouveautime <- c(0:max(times))
+        # if(0 %in% newtimes){
+        #   newtimes <- sort(newtimes[-(newtimes == 0)])
+        #   warning("To assure stability in the function, 0 was removed from the newtimes.")
+        # }
+        nouveautime <- sort(c(newtimes, times))
         idx <- findInterval(newtimes, nouveautime, left.open = TRUE) ## c'était times avant nouveautime (et pareil après si on doit rechanger)
         
         ipredictions$overall_survival <- as.data.frame( ipredictions$overall_survival[,pmin(idx,length(nouveautime-1))] )
@@ -230,6 +244,18 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         
       }
       
+      ## pour nommer les colonnes des estimations individuelles 
+      ints_names <- c()
+      
+      for( i in 1:(length(object$intervals)-1) ){
+        ints_names <- c(ints_names, paste0("(",round(object$intervals[i], digits = 2), ";",
+                                           round(object$intervals[i+1], digits = 2),"]"))
+      }
+      
+      usable_times <- newtimes
+      idx <- findInterval(usable_times, object$intervals, left.open = TRUE)
+      col_names <- paste0(usable_times," in ",ints_names[idx])
+      
       res <- list(
         nnet = splann,
         times = 0:max(times),
@@ -242,25 +268,41 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         #                   population = distPinf,
         #                   excess = distEinf),
         ipredictions = list(
-          overall_survival = cbind(rep(1, N), ipredictions$overall_survival),
-          overall_hazard =  cbind(ipredictions$overall_hazard, rep(NA, N)),
-          population_survival = cbind(rep(1, N), ipredictions$population_survival),
-          population_hazard = cbind(ipredictions$population_hazard, rep(NA, N)),
-          relative_survival = cbind(rep(1, N), ipredictions$relative_survival),
-          relative_hazard = cbind(ipredictions$relative_hazard, rep(NA, N)),
-          population_cif = cbind(rep(0, N), ipredictions$population_cif), 
-          excess_cif = cbind(rep(0, N), ipredictions$excess_cif)
+          overall_survival = { mat <- cbind(rep(1, N), ipredictions$overall_survival)
+          colnames(mat) <- c(0,col_names)
+          mat },
+          overall_hazard =  { mat <- cbind(ipredictions$overall_hazard, rep(NA, N))
+          colnames(mat) <- c(col_names, "NA")
+          mat},
+          population_survival = { mat <- cbind(rep(1, N), ipredictions$population_survival)
+          colnames(mat) <- c(0,col_names)
+          mat },
+          population_hazard = { mat <- cbind(ipredictions$population_hazard, rep(NA, N))
+          colnames(mat) <- c(col_names, "NA")
+          mat},
+          relative_survival = { mat <-cbind(rep(1, N), ipredictions$relative_survival)
+          colnames(mat) <- c(0,col_names)
+          mat },
+          relative_hazard = { mat <- cbind(ipredictions$relative_hazard, rep(NA, N))
+          colnames(mat) <- c(col_names, "NA")
+          mat},
+          population_cif = { mat <- cbind(rep(0, N), ipredictions$population_cif)
+          colnames(mat) <- c(0,col_names)
+          mat }, 
+          excess_cif = { mat <- cbind(rep(0, N), ipredictions$excess_cif)
+          colnames(mat) <- c(0,col_names)
+          mat }
         ),
         mpredictions = list(
-          overall_survival = c(1, overall_survival),
-          overall_hazard = c(overall_hazard, NA),
-          population_survival = c(1, population_survival),  
-          population_hazard = c(population_hazard, NA),  # equation 6 in Biometrics (2012) & lambda_P in JSS (2018)
-          observable_net_hazard = c(observable_net_hazard, NA),  # equation 6 in (Biometrics (2012)
-          observable_net_survival = c(1, observable_net_survival),
-          relative_ratio_hazard = c(relative_ratio_hazard, NA), # equation 9 in Biometrics (2012)
+          overall_survival =  c(1, overall_survival),
+          overall_hazard =  c(overall_hazard, NA),
+          population_survival =  c(1, population_survival),  
+          population_hazard =  c(population_hazard, NA),  # equation 6 in Biometrics (2012) & lambda_P in JSS (2018)
+          observable_net_hazard =  c(observable_net_hazard, NA),  # equation 6 in (Biometrics (2012)
+          observable_net_survival =  c(1, observable_net_survival),
+          relative_ratio_hazard =  c(relative_ratio_hazard, NA), # equation 9 in Biometrics (2012)
           relative_ratio_survival = c(1, relative_ratio_survival),
-          net_hazard = c(net_hazard, NA), # equation 4 in Biometrics (2012)
+          net_hazard =  c(net_hazard, NA), # equation 4 in Biometrics (2012)
           net_survival = c(1, net_survival), # net survival from equation 4 in Biometrics (2012)
           excess_cif =  c(0, excess_cif), # equation page 4 in JSS (2018)
           population_cif =  c(0, population_cif) # equation page 4 in JSS (2018)
