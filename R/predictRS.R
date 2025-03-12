@@ -49,13 +49,15 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       
       hP <- matrix(-99, ncol=length(times), nrow=N)
       
-      exphaz <- function(x,age,sex,year) {
-        survivalNET::expectedhaz(ratetable, age=age, sex=sex, year=year, time=x)
+      exphaz <- function(x,age,sex,year,max_age,max_year) {
+        survivalNET::expectedhaz(ratetable, age=age, sex=sex, year=year, time=x, max_age = max_age, max_year= max_year)
         }
       
       for (i in 1:N) # @Thomas : merci de voir si tu augmenter la vitesse du calcul de hP
       {
-        hP[i,] <- sapply(times, FUN="exphaz", age=data[i,age], sex=data[i,sex], year=data[i,year])
+        hP[i,] <- sapply(times, FUN="exphaz", age=data[i,age], sex=data[i,sex], year=data[i,year], 
+                         max_age = max_age, 
+                         max_year = max_year)
       }
       
       hinstP <- hP[,1:(length(times)-1)]
