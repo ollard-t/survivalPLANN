@@ -53,6 +53,9 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         survivalNET::expectedhaz(ratetable, age=age, sex=sex, year=year, time=x, max_age = max_age, max_year= max_year)
         }
       
+      max_age <- max(as.numeric(dimnames(ratetable)[[1]]))
+      max_year <- max(as.numeric(dimnames(ratetable)[[2]]))
+      
       for (i in 1:N) # @Thomas : merci de voir si tu augmenter la vitesse du calcul de hP
       {
         hP[i,] <- sapply(times, FUN="exphaz", age=data[i,age], sex=data[i,sex], year=data[i,year], 
