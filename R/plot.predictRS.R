@@ -6,32 +6,33 @@ plot.predictRS <- function(x, n.groups=5, type = "relative", pro.time=NULL, newd
   
   method_name <- NULL
   
-  if(is.null(pro.time)){ pro.time <- median(x$nnet$y[,1]) }
+  if(is.null(pro.time)){ pro.time <- median(x$y[,1]) }
   
-  if(is.null(newdata))
-  {
-    cova <-data.frame(x$nnet$x)
-    time <- x$nnet$y[,1];  event <- x$nnet$y[,2]
+  if(is.null(newdata)){
     
+    cova <-data.frame(x$x)
+    time <- x$y[,1];  event <- x$y[,2]
+    .time <- names(x$y[1])
+    .event <- names(x$y[2])
     ratetable <- x$ratetable
     
     covnames <- attr(terms(x$nnet$formula), "term.labels")
-   
-    
     
     ays <- x$ays
     .age <- names(x$ays)[1]
     .year <- names(x$ays)[2]
     .sex <- names(x$ays)[3]
     
-    newdata <- cbind(cova, ays)
-    colnames(newdata) <- c(covnames, .age, .year, .sex)
+    newdata <- cbind(time, event, cova, ays)
+    colnames(newdata) <- c(.time, .event, covnames, .age, .year, .sex)
   }else{
     if(!is.data.frame(newdata)) stop("Argument 'newdata' must be a data frame")
     
     ratetable <- x$ratetable
     covnames <- attr(terms(x$nnet$formula), "term.labels")
     
+    .time <- names(x$y[1])
+    .event <- names(x$y[2])
     .age <- names(x$ays)[1]
     .year <- names(x$ays)[2]
     .sex <- names(x$ays)[3]
@@ -46,13 +47,14 @@ plot.predictRS <- function(x, n.groups=5, type = "relative", pro.time=NULL, newd
     
     ays = newdata[, c(.age, .year, .sex)]
     
-    newdata <- cbind(cova, ays)
-    colnames(newdata) <- c(covnames, .age, .year, .sex)
+    newdata <- cbind(time, event, cova, ays)
+    colnames(newdata) <- c(.time, .event, covnames, .age, .year, .sex)
   }
  
   if( type == "relative"){
   
-    .pred <- predictRS(x$nnet, data = newdata, newtimes = pro.time)$ipredictions$relative_survival[,2]
+    .pred <- predictRS(x$nnet, data = newdata, newtimes = pro.time, 
+                       ratetable = ratetable, age = .age, year = .year, sex = .sex)$ipredictions$relative_survival[,2]
     
     
   method_name = "ederer1"
@@ -63,9 +65,11 @@ plot.predictRS <- function(x, n.groups=5, type = "relative", pro.time=NULL, newd
   
   if(type == "net"){
     
-    .pred <- predict(x, newdata=newdata, newtimes=pro.time)$ipredictions
+    .pred <- predict(x$nnet, newdata=newdata, newtimes=pro.time,
+                     ratetable = ratetable, age = .age, year = .year, sex = .sex)$ipredictions
     
-    .pred <- .pred$survival_E[,1]
+    .pred <- .pred$survival_E[,1] ### on n'a plus de survie indiviudelle nette 
+    #(la suvie nette étant définie comme le ratio des moyennes) 
     
     method_name = "pohar-perme"
     
@@ -75,9 +79,10 @@ plot.predictRS <- function(x, n.groups=5, type = "relative", pro.time=NULL, newd
   
   if(type == "CIF_C"){
     
-    .pred <- predict(x, newdata=newdata, newtimes=pro.time)$ipredictions
+    .pred <- predict(x$nnet, newdata=newdata, newtimes=pro.time,
+                     ratetable = ratetable, age = .age, year = .year, sex = .sex)$ipredictions
     
-    .pred <- .pred$CIF_C[,1]
+    .pred <- .pred$excess_cif[,2]
     
     yname <- "rsPLANN predictions"
     xname <- "Cause specific CIF predictions"
@@ -85,9 +90,10 @@ plot.predictRS <- function(x, n.groups=5, type = "relative", pro.time=NULL, newd
   
   if(type == "CIF_P"){
     
-    .pred <- predict(x, newdata=newdata, newtimes=pro.time)$ipredictions
+    .pred <- predictRS(x$nnet, data=newdata, newtimes=pro.time,
+                     ratetable = ratetable, age = .age, year = .year, sex = .sex)$ipredictions
     
-    .pred <- .pred$CIF_P[,1]
+    .pred <- .pred$population_cif[,2]
     
     yname <- "rsPLANN predictions"
     xname <- "Population CIF predictions"
@@ -104,10 +110,22 @@ plot.predictRS <- function(x, n.groups=5, type = "relative", pro.time=NULL, newd
   .data <- data.frame(time = time, event = event, grps = .grps, age = age, year = year, sex = sex )
 
   if(!is.null(method_name)){
-
-  .survfit <- summary(rs.surv(Surv(time, event) ~ grps, data = .data,
-                              ratetable = ratetable, method = method_name,
-                              rmap = list(age = age, sex = sex, year = year)))
+      .obs <- c()
+      .lower <- c()
+      .upper <- c()
+      for(i in 1:n.groups){
+        datahold <- .data[.data$grps == i, ]
+        
+        .survfit <- summary(rs.surv(Surv(time, event) ~ 1, data = datahold,
+                                ratetable = ratetable, method = method_name,
+                                rmap = list(age = age, sex = sex, year = year),
+                                add.times = pro.time), times = pro.time)
+        
+        .obs <- c(.obs, .survfit$surv)
+        .lower <- c(.lower, .survfit$lower)
+        .upper <- c(.upper, .survfit$upper)
+        
+      }
   
    }
   
@@ -170,17 +188,17 @@ plot.predictRS <- function(x, n.groups=5, type = "relative", pro.time=NULL, newd
     
   }
 
-  .obs <- sapply(1:n.groups, FUN = function(x) {
-    .indic <- sum(as.numeric(.survfit$strata)==x & .survfit$time<=pro.time)
-    .survfit$surv[ .indic ] } )
-  
-  .lower <- sapply(1:n.groups, FUN = function(x) {
-    .indic <- sum(as.numeric(.survfit$strata)==x & .survfit$time<=pro.time)
-    .survfit$lower[ .indic ] } )
-  
-  .upper <- sapply(1:n.groups, FUN = function(x) {
-    .indic <- sum(as.numeric(.survfit$strata)==x & .survfit$time<=pro.time)
-    .survfit$upper[ .indic ] } )
+  # .obs <- sapply(1:n.groups, FUN = function(x) {
+  #   .indic <- sum(as.numeric(.survfit$strata)==x & .survfit$time<=pro.time)
+  #   .survfit$surv[ .indic ] } )
+  # 
+  # .lower <- sapply(1:n.groups, FUN = function(x) {
+  #   .indic <- sum(as.numeric(.survfit$strata)==x & .survfit$time<=pro.time)
+  #   .survfit$lower[ .indic ] } )
+  # 
+  # .upper <- sapply(1:n.groups, FUN = function(x) {
+  #   .indic <- sum(as.numeric(.survfit$strata)==x & .survfit$time<=pro.time)
+  #   .survfit$upper[ .indic ] } )
   
   
   if(hasArg(cex)==FALSE) {cex <-1} else {cex <- list(...)$cex}

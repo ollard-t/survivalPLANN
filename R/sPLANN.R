@@ -97,7 +97,7 @@ sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
               maxit = maxit,
               MaxNWts = MaxNWts,
               coefnames = gsub("\\+", "", attr(terms(formula), "term.labels")),
-              y = cbind(time = time, status = event),
+              y = cbind(time, event),
               x = cova,
               intervals = intervals,
               pro.time = pro.time, #pour calcul logll predictRS

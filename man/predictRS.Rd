@@ -9,11 +9,12 @@ Predict Net Survivals From a Neural Network Based on the PLANN Method
 This function produces several net survival predictions from a neural network based on the PLANN method. 
 }
 
-\usage{predictRS(object, data, ratetable, age, year, sex) }
+\usage{predictRS(object, data, newtimes = NULL, ratetable, age, year, sex) }
 
 \arguments{
 \item{object}{The result of the \code{sPLANN} function.}
 \item{data}{A data frame comprising of new observed predictors}
+\item{newtimes}{A optional numeric vector comprising of times to get survival estimations. If \code{NULL}, the times are each increment between 1 and the outer bund of the last inervall of the "sPLANN" object.}
 \item{ratetable}{A table of expected rates of the studied event, such as \code{fr.ratetable} for the mortality of the French population, i.e. an array with three dimensions: age, sex and year.}
 \item{age}{A numeric vector with the patient age at baseline in days.}
 \item{year}{A numeric vector with the baseline date in the study respecting the date format: number of days since 01.01.1960.}
@@ -42,16 +43,16 @@ splann <- sPLANN(Surv(time, event)~ sex + agey + stade + delay, data=dataK,
 data("fr.ratetable") # import the table with the expected population mortality
 
 # predictions of the relative survival for the first 10 patients
-#datap <- predictRS(object=splann, data=dataK[1:10,],
-#                 ratetable=fr.ratetable, age="age", sex="sexchara", year="year")
+datap <- predictRS(object=splann, data=dataK[1:10,],
+                ratetable=fr.ratetable, age="age", sex="sexchara", year="year")
                  
-#plot(x=datap$times/365.241, y=datap$ipredictions$relative_survival[1,],
-#     col="gray", type="s", xlab="Time in years", ylab="Relative survival")
+plot(x=datap$times/365.241, y=datap$ipredictions$relative_survival[1,],
+     col="gray", type="s", xlab="Time in years", ylab="Relative survival")
      
-#for (i in 2:5) {
-#     lines(x=datap$times/365.241, y=datap$ipredictions$relative_survival[i,],
-#           col="gray", type="s")
-#     }
+for (i in 2:5) {
+     lines(x=datap$times/365.241, y=datap$ipredictions$relative_survival[i,],
+          col="gray", type="s")
+   }
 }
 
 \keyword{Predicting}
