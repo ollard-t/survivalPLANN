@@ -257,9 +257,11 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
                                            round(object$intervals[i+1], digits = 2),"]"))
       }
       
-      usable_times <- newtimes
+      usable_times <- times[times != 0]
       idx <- findInterval(usable_times, object$intervals, left.open = TRUE)
       col_names <- paste0(usable_times," in ",ints_names[idx])
+      
+      
       
       res <- list(
         nnet = splann,
