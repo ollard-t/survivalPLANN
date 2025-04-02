@@ -80,7 +80,6 @@ sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
     dup_count <- as.numeric(table( floor(as.numeric(rownames(data_dup))) ) )
     weights <- rep(weights,dup_count)
     args$weights = weights
-    # print(length(args$weights)) 
   }
 
   survnet <- do.call(nnet, c(list(formula = formulaInt, data = data_dup, size = size, maxit = maxit, 

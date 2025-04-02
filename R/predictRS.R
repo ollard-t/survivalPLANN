@@ -222,27 +222,27 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         nouveautime <- sort(c(newtimes, times))
         idx <- findInterval(newtimes, nouveautime, left.open = TRUE) ## c'était times avant nouveautime (et pareil après si on doit rechanger)
         
-        ipredictions$overall_survival <- as.data.frame( ipredictions$overall_survival[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$overall_hazard <- as.data.frame( ipredictions$overall_hazard[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$population_survival <- as.data.frame( ipredictions$population_survival[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$population_hazard <- as.data.frame( ipredictions$population_hazard[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$relative_survival <- as.data.frame( ipredictions$relative_survival[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$relative_hazard <- as.data.frame( ipredictions$relative_hazard[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$population_cif <- as.data.frame( ipredictions$population_cif[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$excess_cif <- as.data.frame( ipredictions$excess_cif[,pmin(idx,length(nouveautime-1))] )
+        ipredictions$overall_survival <- as.data.frame( ipredictions$overall_survival[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$overall_hazard <- as.data.frame( ipredictions$overall_hazard[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$population_survival <- as.data.frame( ipredictions$population_survival[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$population_hazard <- as.data.frame( ipredictions$population_hazard[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$relative_survival <- as.data.frame( ipredictions$relative_survival[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$relative_hazard <- as.data.frame( ipredictions$relative_hazard[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$population_cif <- as.data.frame( ipredictions$population_cif[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$excess_cif <- as.data.frame( ipredictions$excess_cif[,pmin(idx,length(nouveautime)-1)] )
         
-        overall_survival <- overall_survival[pmin(idx,length(nouveautime-1))] 
-        overall_hazard <- overall_hazard[pmin(idx,length(nouveautime-1))] 
-        population_survival <- population_survival[pmin(idx,length(nouveautime-1))] 
-        population_hazard <- population_hazard[pmin(idx,length(nouveautime-1))] 
-        observable_net_hazard <- observable_net_hazard[pmin(idx,length(nouveautime-1))] 
-        observable_net_survival <- observable_net_survival[pmin(idx,length(nouveautime-1))] 
-        relative_ratio_hazard <- relative_ratio_hazard[pmin(idx,length(nouveautime-1))] 
-        relative_ratio_survival <- relative_ratio_survival[pmin(idx,length(nouveautime-1))] 
-        net_hazard <- net_hazard[pmin(idx,length(nouveautime-1))] 
-        net_survival <- net_survival[pmin(idx,length(nouveautime-1))] 
-        excess_cif <- excess_cif[pmin(idx,length(nouveautime-1))] 
-        population_cif <- population_cif[pmin(idx,length(nouveautime-1))] 
+        overall_survival <- overall_survival[pmin(idx,length(nouveautime)-1)] 
+        overall_hazard <- overall_hazard[pmin(idx,length(nouveautime)-1)] 
+        population_survival <- population_survival[pmin(idx,length(nouveautime)-1)] 
+        population_hazard <- population_hazard[pmin(idx,length(nouveautime)-1)] 
+        observable_net_hazard <- observable_net_hazard[pmin(idx,length(nouveautime)-1)] 
+        observable_net_survival <- observable_net_survival[pmin(idx,length(nouveautime)-1)] 
+        relative_ratio_hazard <- relative_ratio_hazard[pmin(idx,length(nouveautime)-1)] 
+        relative_ratio_survival <- relative_ratio_survival[pmin(idx,length(nouveautime)-1)] 
+        net_hazard <- net_hazard[pmin(idx,length(nouveautime)-1)] 
+        net_survival <- net_survival[pmin(idx,length(nouveautime)-1)] 
+        excess_cif <- excess_cif[pmin(idx,length(nouveautime)-1)] 
+        population_cif <- population_cif[pmin(idx,length(nouveautime)-1)] 
        
         
         times <- newtimes
