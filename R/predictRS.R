@@ -65,7 +65,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       
       hinstP <- hP[,1:(length(times)-1)]
       
-      hinstE <- hinstO - hinstP
+      hinstE <- pmax(hinstO - hinstP, 0)
       
       if(is.null(newtimes)){
         
@@ -106,7 +106,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
           temp2 <- temp2[order(temp2$times),]
         }
         mult <- diff(floor(c(0,temp2$times)))
-        
+
         temp2$overall_survival<- exp(-cumsum(mult*temp2$hinstO))
         temp2$population_survival<- exp(-cumsum(mult*temp2$hinstP))
         temp2$relative_survival <- exp(-cumsum(mult*temp2$hinstE))
@@ -150,7 +150,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       overall_survival <- exp(-cumsum(mult*overall_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
       
       .numerator <- apply(ipredictions$relative_survival, FUN="sum", MARGIN=2)
-      net_hazard <- apply(ipredictions$relative_survival * ipredictions$relative_hazard, FUN="sum", MARGIN=2) / .numerator
+      net_hazard <- apply(ipredictions$relative_survival * ipredictions$relative_hazard, FUN="sum", MARGIN=2) / .numerator # equaition 4 biometrics (2012)
       net_survival <- exp(-cumsum(mult*net_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
       
       .numerator <- apply(ipredictions$population_survival, FUN="sum", MARGIN=2)
