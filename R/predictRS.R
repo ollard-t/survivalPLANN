@@ -1,7 +1,8 @@
 
 predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
 {
-
+  
+  if (!inherits(object, "sPLANN")) stop("The object must be of class 'sPLANN'")
   if (missing(object)) stop("an object of the class sPLANN is required")
   if (missing(data)) stop("a data argument is required")
 
