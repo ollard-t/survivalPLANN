@@ -41,9 +41,9 @@ pred <- predict(splann, newdata = dnew)
 
 # Predictions for a men or a women with no delay at the diagnostic of non-agressive cancer
 
-plot(c(0:13*365.241, 5027.15), c(pred$predictions[1,]), ylab="Patient survival",
+plot(pred$times, c(pred$predictions[1,]), ylab="Patient survival",
   xlab="Post-diagnosis time in years", type="l")
-lines(c(0:13*365.241, 5027.15), c(pred$predictions[2,]), type="l", col=2)
+lines(pred$times, c(pred$predictions[2,]), type="l", col=2)
 }
 
 \keyword{Predicting}

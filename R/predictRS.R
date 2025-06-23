@@ -1,7 +1,8 @@
 
 predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
 {
-
+  
+  if (!inherits(object, "sPLANN")) stop("The object must be of class 'sPLANN'")
   if (missing(object)) stop("an object of the class sPLANN is required")
   if (missing(data)) stop("a data argument is required")
 
@@ -65,7 +66,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       
       hinstP <- hP[,1:(length(times)-1)]
       
-      hinstE <- hinstO - hinstP
+      hinstE <- pmax(hinstO - hinstP, 0)
       
       if(is.null(newtimes)){
         
@@ -106,7 +107,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
           temp2 <- temp2[order(temp2$times),]
         }
         mult <- diff(floor(c(0,temp2$times)))
-        
+
         temp2$overall_survival<- exp(-cumsum(mult*temp2$hinstO))
         temp2$population_survival<- exp(-cumsum(mult*temp2$hinstP))
         temp2$relative_survival <- exp(-cumsum(mult*temp2$hinstE))
@@ -150,7 +151,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       overall_survival <- exp(-cumsum(mult*overall_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
       
       .numerator <- apply(ipredictions$relative_survival, FUN="sum", MARGIN=2)
-      net_hazard <- apply(ipredictions$relative_survival * ipredictions$relative_hazard, FUN="sum", MARGIN=2) / .numerator
+      net_hazard <- apply(ipredictions$relative_survival * ipredictions$relative_hazard, FUN="sum", MARGIN=2) / .numerator # equaition 4 biometrics (2012)
       net_survival <- exp(-cumsum(mult*net_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
       
       .numerator <- apply(ipredictions$population_survival, FUN="sum", MARGIN=2)
@@ -222,27 +223,27 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         nouveautime <- sort(c(newtimes, times))
         idx <- findInterval(newtimes, nouveautime, left.open = TRUE) ## c'était times avant nouveautime (et pareil après si on doit rechanger)
         
-        ipredictions$overall_survival <- as.data.frame( ipredictions$overall_survival[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$overall_hazard <- as.data.frame( ipredictions$overall_hazard[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$population_survival <- as.data.frame( ipredictions$population_survival[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$population_hazard <- as.data.frame( ipredictions$population_hazard[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$relative_survival <- as.data.frame( ipredictions$relative_survival[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$relative_hazard <- as.data.frame( ipredictions$relative_hazard[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$population_cif <- as.data.frame( ipredictions$population_cif[,pmin(idx,length(nouveautime-1))] )
-        ipredictions$excess_cif <- as.data.frame( ipredictions$excess_cif[,pmin(idx,length(nouveautime-1))] )
+        ipredictions$overall_survival <- as.data.frame( ipredictions$overall_survival[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$overall_hazard <- as.data.frame( ipredictions$overall_hazard[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$population_survival <- as.data.frame( ipredictions$population_survival[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$population_hazard <- as.data.frame( ipredictions$population_hazard[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$relative_survival <- as.data.frame( ipredictions$relative_survival[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$relative_hazard <- as.data.frame( ipredictions$relative_hazard[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$population_cif <- as.data.frame( ipredictions$population_cif[,pmin(idx,length(nouveautime)-1)] )
+        ipredictions$excess_cif <- as.data.frame( ipredictions$excess_cif[,pmin(idx,length(nouveautime)-1)] )
         
-        overall_survival <- overall_survival[pmin(idx,length(nouveautime-1))] 
-        overall_hazard <- overall_hazard[pmin(idx,length(nouveautime-1))] 
-        population_survival <- population_survival[pmin(idx,length(nouveautime-1))] 
-        population_hazard <- population_hazard[pmin(idx,length(nouveautime-1))] 
-        observable_net_hazard <- observable_net_hazard[pmin(idx,length(nouveautime-1))] 
-        observable_net_survival <- observable_net_survival[pmin(idx,length(nouveautime-1))] 
-        relative_ratio_hazard <- relative_ratio_hazard[pmin(idx,length(nouveautime-1))] 
-        relative_ratio_survival <- relative_ratio_survival[pmin(idx,length(nouveautime-1))] 
-        net_hazard <- net_hazard[pmin(idx,length(nouveautime-1))] 
-        net_survival <- net_survival[pmin(idx,length(nouveautime-1))] 
-        excess_cif <- excess_cif[pmin(idx,length(nouveautime-1))] 
-        population_cif <- population_cif[pmin(idx,length(nouveautime-1))] 
+        overall_survival <- overall_survival[pmin(idx,length(nouveautime)-1)] 
+        overall_hazard <- overall_hazard[pmin(idx,length(nouveautime)-1)] 
+        population_survival <- population_survival[pmin(idx,length(nouveautime)-1)] 
+        population_hazard <- population_hazard[pmin(idx,length(nouveautime)-1)] 
+        observable_net_hazard <- observable_net_hazard[pmin(idx,length(nouveautime)-1)] 
+        observable_net_survival <- observable_net_survival[pmin(idx,length(nouveautime)-1)] 
+        relative_ratio_hazard <- relative_ratio_hazard[pmin(idx,length(nouveautime)-1)] 
+        relative_ratio_survival <- relative_ratio_survival[pmin(idx,length(nouveautime)-1)] 
+        net_hazard <- net_hazard[pmin(idx,length(nouveautime)-1)] 
+        net_survival <- net_survival[pmin(idx,length(nouveautime)-1)] 
+        excess_cif <- excess_cif[pmin(idx,length(nouveautime)-1)] 
+        population_cif <- population_cif[pmin(idx,length(nouveautime)-1)] 
        
         
         times <- newtimes
@@ -257,9 +258,11 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
                                            round(object$intervals[i+1], digits = 2),"]"))
       }
       
-      usable_times <- newtimes
+      usable_times <- times[times != 0]
       idx <- findInterval(usable_times, object$intervals, left.open = TRUE)
       col_names <- paste0(usable_times," in ",ints_names[idx])
+      
+      
       
       res <- list(
         nnet = splann,
