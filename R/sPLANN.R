@@ -42,10 +42,12 @@ sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
   #in which interval the time t is :  
   data$Intervals = findInterval(time, intervals, left.open = TRUE)
   
-  data_dup <- data[rep(seq_len(nrow(data)), data$Intervals), ]
-  data_dup$Intervals <- ave(1:nrow(data_dup), data_dup[as.character(formula[[2]][2])], FUN = seq_along)
-  
-  
+  data$id <- seq_len(nrow(data))
+  data_dup <- data[rep(data$id, data$Intervals), ]
+  data_dup$id <- rep(data$id, data$Intervals)
+  data_dup$Intervals <- ave(data_dup$id, data_dup$id, FUN = seq_along)
+  data_dup <- data_dup[,-dim(data_dup)[2]] 
+ 
   modify_column = function(column) {
     if (length(column)==1){
       column = column

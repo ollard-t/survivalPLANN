@@ -46,11 +46,11 @@ data("fr.ratetable") # import the table with the expected population mortality
 datap <- predictRS(object=splann, data=dataK[1:10,],
                 ratetable=fr.ratetable, age="age", sex="sexchara", year="year")
                  
-plot(x=datap$times/365.241, y=datap$ipredictions$relative_survival[1,],
+plot(x=(0:(round(max(datap$times)/30.41)+1)), y=datap$ipredictions$relative_survival[1,],
      col="gray", type="s", xlab="Time in years", ylab="Relative survival")
      
 for (i in 2:5) {
-     lines(x=datap$times/365.241, y=datap$ipredictions$relative_survival[i,],
+     lines(x=(0:(round(max(datap$times)/30.41)+1)), y=datap$ipredictions$relative_survival[i,],
           col="gray", type="s")
    }
 }
