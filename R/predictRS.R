@@ -210,8 +210,10 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         ipredictions$relative_survival[i, event_time[i]]
       })
       
-      loglik <- sum(splann$y[,2]*log(pop_hinst+exc_hinst)+log(net_surv)) 
-      
+      if (identical(data, splann$data[,-c(length(splann$data)-1 ,length(splann$data))])) {
+          loglik <- sum(splann$y[,2]*log(pop_hinst+exc_hinst)+log(net_surv)) 
+      }
+          
       if(!is.null(newtimes)) 
         {
         newtimes <- unique(newtimes)      
@@ -271,7 +273,6 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         y =  data[, c(as.character(splann$formula[[2]][2]), as.character(splann$formula[[2]][3]))],
         ays = data[,c(age, year, sex)],
         ratetable = ratetable,
-        loglik = loglik,
         #    max_cif = list(asymptotic = estimPcure,
         #                   population = distPinf,
         #                   excess = distEinf),
@@ -317,6 +318,9 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
           #      cure = apply(Pcure, FUN="mean", MARGIN=2)
         )
       )
+      if (exists("loglik")) {
+        res$loglik = loglik
+      }
       class(res) <- "predictRS"
       return(res)
 }
