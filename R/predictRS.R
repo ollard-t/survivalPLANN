@@ -95,7 +95,6 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         
         temp1$interval <- findInterval(temp1$times, temp0$times0, left.open = TRUE)
 
-        # temp2 <- merge(temp1, temp0, by="interval")
         temp2 <- temp0[temp1$interval,]
         temp2$times <- temp1$times
         
@@ -140,64 +139,38 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       
       # equation 6 in Biometrics (2012)
       observable_net_hazard <- apply(ipredictions$overall_survival * ipredictions$relative_hazard, FUN="sum", MARGIN=2) / .numerator
-      observable_net_survival <- exp(-cumsum(mult*observable_net_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
+      observable_net_survival <- exp(-cumsum(mult*observable_net_hazard)) 
       
       # equation 6 in Biometrics (2012) & lambda_P in JSS (2018)
       population_hazard  <- apply(ipredictions$overall_survival * ipredictions$population_hazard, FUN="sum", MARGIN=2) / .numerator
-      population_survival <- exp(-cumsum(mult*population_hazard)) ##pred très proche (3 chiffres après la virgule) de ce qu'on avait avant mais petite différence /!\
+      population_survival <- exp(-cumsum(mult*population_hazard)) 
       
       # from the two previous equations (just after the equation 6 in Biometrics (2012))
       overall_hazard <- apply(ipredictions$overall_survival * ipredictions$overall_hazard, FUN="sum", MARGIN=2) / .numerator
-      overall_survival <- exp(-cumsum(mult*overall_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
+      overall_survival <- exp(-cumsum(mult*overall_hazard)) 
       
       .numerator <- apply(ipredictions$relative_survival, FUN="sum", MARGIN=2)
       net_hazard <- apply(ipredictions$relative_survival * ipredictions$relative_hazard, FUN="sum", MARGIN=2) / .numerator # equaition 4 biometrics (2012)
-      net_survival <- exp(-cumsum(mult*net_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
+      net_survival <- exp(-cumsum(mult*net_hazard)) 
       
       .numerator <- apply(ipredictions$population_survival, FUN="sum", MARGIN=2)
       relative_ratio_hazard <- overall_hazard - 
         apply(ipredictions$population_survival * ipredictions$population_hazard, FUN="sum", MARGIN=2)  /  .numerator
-      relative_ratio_survival <- exp(-cumsum(mult*relative_ratio_hazard)) ##pred très proche de ce qu'on avait avant mais petite différence /!\
+      relative_ratio_survival <- exp(-cumsum(mult*relative_ratio_hazard)) 
       
       excess_cif <- cumsum( mult*overall_survival * observable_net_hazard) # equation end page 4 in JSS (2018)
-      ##pred très proche de ce qu'on avait avant mais petite différence /!\
-      population_cif <- cumsum( mult*overall_survival * population_hazard) # equation end page 4 in JSS (2018)
-      ##pred très proche de ce qu'on avait avant mais petite différence /!\
       
-      #population_cif[survO==1] <- 0
-      #excess_cif[survO==1] <- 0
+      population_cif <- cumsum( mult*overall_survival * population_hazard) # equation end page 4 in JSS (2018)
+      
       
       last_population_cif <- population_cif[length(population_cif)]
       last_excess_cif <- excess_cif[length(excess_cif)]
-      
-      #estimPcure <- (round(distPinf + distEinf, 3) == 1)
-      #Pcure <- distPinf / survU
-      #Pcure[estimPcure==FALSE,] <- NA
-      
-      #sumSp <- apply(survP, FUN="sum", MARGIN=2)
-      
-      #SPlP <- survP[,1:(P-1)] * hinstP
-      #sumSPlP <- apply(SlP, FUN="sum", MARGIN=2)
       
       ### log-likelihood 
       ## on récpère intervalles où tombent les temps d'evt et de censure
       
       event_time <- findInterval(splann$y[,1], splann$intervals,left.open = TRUE)
       
-      # #on récupère le risque instantané indivudel observé au temps d'evt/censure
-      # ind_hinstO <- sapply(1:(dim(data)[1]), function(i) {
-      #   hinstO[i, event_time[i]]
-      # })
-      # #et la survie observée individuelle au temps d'evt/censure 
-      # ind_survO <-  sapply(1:(dim(data)[1]), function(i) {
-      #   ipredictions$overall_survival[i, event_time[i]]
-      # })
-      # 
-      # loglik <- sum(splann$y[,2]*log(ind_hinstO)+log(ind_survO)) 
-      
-      ### log-likelihood 
-      
-      #on récupère le risque instantané populationnel au temps d'evt/censure
       pop_hinst <- sapply(1:(dim(data)[1]), function(i) {
         ipredictions$population_hazard[i, event_time[i]]
       })
@@ -218,13 +191,9 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         {
         newtimes <- unique(newtimes)      
         
-        # if(0 %in% newtimes){
-        #   newtimes <- sort(newtimes[-(newtimes == 0)])
-        #   warning("To assure stability in the function, 0 was removed from the newtimes.")
-        # }
         nouveautime <- sort(c(newtimes, times))
-        idx <- findInterval(newtimes, nouveautime, left.open = TRUE) ## c'était times avant nouveautime (et pareil après si on doit rechanger)
-        
+        idx <- findInterval(newtimes, nouveautime, left.open = TRUE) 
+      
         ipredictions$overall_survival <- as.data.frame( ipredictions$overall_survival[,pmin(idx,length(nouveautime)-1)] )
         ipredictions$overall_hazard <- as.data.frame( ipredictions$overall_hazard[,pmin(idx,length(nouveautime)-1)] )
         ipredictions$population_survival <- as.data.frame( ipredictions$population_survival[,pmin(idx,length(nouveautime)-1)] )
@@ -273,9 +242,6 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         y =  data[, c(as.character(splann$formula[[2]][2]), as.character(splann$formula[[2]][3]))],
         ays = data[,c(age, year, sex)],
         ratetable = ratetable,
-        #    max_cif = list(asymptotic = estimPcure,
-        #                   population = distPinf,
-        #                   excess = distEinf),
         ipredictions = list(
           overall_survival = { mat <- cbind(rep(1, N), ipredictions$overall_survival)
           colnames(mat) <- c(0,col_names)
@@ -315,7 +281,6 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
           net_survival = c(1, net_survival), # net survival from equation 4 in Biometrics (2012)
           excess_cif =  c(0, excess_cif), # equation page 4 in JSS (2018)
           population_cif =  c(0, population_cif) # equation page 4 in JSS (2018)
-          #      cure = apply(Pcure, FUN="mean", MARGIN=2)
         )
       )
       if (exists("loglik")) {
