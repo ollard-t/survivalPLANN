@@ -174,7 +174,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       ## on récpère intervalles où tombent les temps d'evt et de censure
       
       event_time <- findInterval(data[,as.character(object$formula[[2]][2])], splann$intervals,left.open = TRUE)
-      
+      event_time[event_time > dim(ipredictions$population_hazard)[2]] <- dim(ipredictions$population_hazard)[2]
       pop_hinst <- sapply(1:(dim(data)[1]), function(i) {
         ipredictions$population_hazard[i, event_time[i]]
       })
