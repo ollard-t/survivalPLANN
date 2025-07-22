@@ -34,8 +34,8 @@ sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
   
   #### making of intervals from PLANN
   
-  if (is.null(pro.time)) {pro.time <- max(time[event==1])} # modif
-  # if (is.null(pro.time)) {pro.time <- max(time)} # modif 
+  # if (is.null(pro.time)) {pro.time <- max(time[event==1])} # modif
+  if (is.null(pro.time)) {pro.time <- max(time)} # modif
   
   intervals <- unique(c(0, seq(inter, pro.time, by=inter), pro.time)) # modif
   
