@@ -172,23 +172,24 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       
       ### log-likelihood 
       ## on récpère intervalles où tombent les temps d'evt et de censure
-      
-      event_time <- findInterval(data[,as.character(object$formula[[2]][2])], splann$intervals,left.open = TRUE)
-      event_time[event_time > dim(ipredictions$population_hazard)[2]] <- dim(ipredictions$population_hazard)[2]
-      pop_hinst <- sapply(1:(dim(data)[1]), function(i) {
-        ipredictions$population_hazard[i, event_time[i]]
-      })
-      #on récupère le risque instantané en exces au temps d'evt/censure
-      exc_hinst <- sapply(1:(dim(data)[1]), function(i) {
-        ipredictions$relative_hazard[i, event_time[i]]
-      })
-      #et la survie nette au temps d'evt/censure 
-      net_surv <-  sapply(1:(dim(data)[1]), function(i) {
-        ipredictions$relative_survival[i, event_time[i]]
-      })
-      
-    if(all(c(as.character(object$formula[[2]][2]), as.character(object$formula[[2]][3])) %in% names(data))) {
-      loglik <- sum(data[,as.character(object$formula[[2]][3])]*log(pop_hinst+exc_hinst)+log(net_surv))
+      if(all(c(as.character(object$formula[[2]][2]), as.character(object$formula[[2]][3])) %in% names(data))) {
+        
+        event_time <- findInterval(data[,as.character(object$formula[[2]][2])], splann$intervals,left.open = TRUE)
+        event_time[event_time > dim(ipredictions$population_hazard)[2]] <- dim(ipredictions$population_hazard)[2]
+        pop_hinst <- sapply(1:(dim(data)[1]), function(i) {
+          ipredictions$population_hazard[i, event_time[i]]
+        })
+        #on récupère le risque instantané en exces au temps d'evt/censure
+        exc_hinst <- sapply(1:(dim(data)[1]), function(i) {
+          ipredictions$relative_hazard[i, event_time[i]]
+        })
+        #et la survie nette au temps d'evt/censure 
+        net_surv <-  sapply(1:(dim(data)[1]), function(i) {
+          ipredictions$relative_survival[i, event_time[i]]
+        })
+        
+     
+        loglik <- sum(data[,as.character(object$formula[[2]][3])]*log(pop_hinst+exc_hinst)+log(net_surv))
 
     }
       # if(!(identical(data, splann$data[,-c(length(splann$data)-1 ,length(splann$data))]))) {
@@ -251,7 +252,6 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         nnet = splann,
         times = 0:max(times),
         x = data[,c(colnames(splann$x))],
-        y =  data[, c(as.character(splann$formula[[2]][2]), as.character(splann$formula[[2]][3]))],
         ays = data[,c(age, year, sex)],
         ratetable = ratetable,
         ipredictions = list(
@@ -297,6 +297,9 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       )
       if (exists("loglik")) {
         res$loglik = loglik
+      }
+      if(all(c(as.character(object$formula[[2]][2]), as.character(object$formula[[2]][3])) %in% names(data))){
+        res$y =  data[, c(as.character(splann$formula[[2]][2]), as.character(splann$formula[[2]][3]))]
       }
       class(res) <- "predictRS"
       return(res)
