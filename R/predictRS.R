@@ -66,7 +66,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         hP[i,] <- sapply(times, FUN="exphaz", age=data[i,age], sex=data[i,sex], year=data[i,year], 
                          max_age = max_age, 
                          max_year = max_year)
-      }
+      }  ##ne pa essayer double sapply c'est plus lent 
       
       hinstP <- hP[,1:(length(times)-1)]
       
