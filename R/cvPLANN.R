@@ -1,6 +1,6 @@
 
 cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=1, size = 8, decay = 0.01,
-                    maxit = 1000, MaxNWts=10000, metric = "ci")
+                    maxit = 1000, MaxNWts=10000, metric = "ibs")
 {
   
   ####### check errors
