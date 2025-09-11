@@ -1,6 +1,6 @@
 
 cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=1, size = 8, decay = 0.01,
-                    maxit = 1000, MaxNWts=10000)
+                    maxit = 1000, MaxNWts=10000, metric = "ibs")
 {
   
   ####### check errors
@@ -160,7 +160,7 @@ cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=1, size = 8, deca
     return(metrics(formula = .predformula, prediction.matrix = 
                     as.matrix(as.data.frame(prediction.matrix)),
                    data=data, prediction.times=prediction.times,
-                   pro.time=pro.time, metric="ci"))
+                   pro.time=pro.time, metric= metric))
   }
   
   .measure<-sapply(.FitCV, plann.best.measure, formula = formula , data=data.plann, prediction.times=.time)

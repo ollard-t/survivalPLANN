@@ -18,15 +18,19 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   .age <- age
   .year <- year
   .sex <- sex
-  indic <- c(as.character(object$formula[[2]][2]), as.character(object$formula[[2]][3]),
-             covnames,.age, .year, .sex) %in% names(data) 
+  indic <- c(covnames,.age, .year, .sex) %in% names(data) 
   if( sum(!indic) > 0 ) stop("Missing predictor in the new data frame")
   
   if(!is.null(newtimes) & 0 %in% newtimes)stop("Error : 0 found in 'newtimes'. For stablity of the function, 0 can't be in 'newtimes'.")
       
       splann <- object
-  
-      predO <- predict(object=splann, newdata=data, newtimes=splann$intervals)
+      
+      times <- splann$intervals
+      if(!is.null(newtimes)){
+        matches <- sapply(newtimes, function(nt) any(abs(times - nt) < 1e-6)) ## pour n'ajouter que des temps nouveaux dans la base
+        times <- sort(c(times, newtimes[!matches]))}
+      
+      predO <- predict(object=splann, newdata=data, newtimes=times)
       
       times <- predO$times
       
@@ -62,13 +66,13 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         hP[i,] <- sapply(times, FUN="exphaz", age=data[i,age], sex=data[i,sex], year=data[i,year], 
                          max_age = max_age, 
                          max_year = max_year)
-      }
+      }  ##ne pa essayer double sapply c'est plus lent 
       
       hinstP <- hP[,1:(length(times)-1)]
       
       hinstE <- pmax(hinstO - hinstP, 0)
       
-      if(is.null(newtimes)){
+      # if(is.null(newtimes)){
         
         .temp <- rep(-99, N * (length(times)-1))
       
@@ -76,15 +80,15 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
                             overall_hazard=.temp, population_hazard=.temp, relative_hazard=.temp,
                             overall_survival=.temp, population_survival=.temp, relative_survival=.temp,
                             population_cif=.temp, excess_cif=.temp)
-      }else{
-        
-        .temp <- rep(-99, N * (length(times)-1+length(newtimes)))
-        
-        results <- data.frame(id=sort(rep(1:N, (length(times)-1+length(newtimes)) )), times = .temp,
-                              overall_hazard=.temp, population_hazard=.temp, relative_hazard=.temp,
-                              overall_survival=.temp, population_survival=.temp, relative_survival=.temp,
-                              population_cif=.temp, excess_cif=.temp)
-      }
+      # }else{
+      #   
+      #   .temp <- rep(-99, N * (length(times)-1))
+      #   
+      #   results <- data.frame(id=sort(rep(1:N, (length(times)-1) )), times = .temp,
+      #                         overall_hazard=.temp, population_hazard=.temp, relative_hazard=.temp,
+      #                         overall_survival=.temp, population_survival=.temp, relative_survival=.temp,
+      #                         population_cif=.temp, excess_cif=.temp)
+      # }
       
       for (i in 1:N)
       { 
@@ -98,13 +102,13 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         temp2 <- temp0[temp1$interval,]
         temp2$times <- temp1$times
         
-        if(!is.null(newtimes)){
-          row_index <- findInterval(newtimes, temp0$times0, left.open = TRUE)
-          new_row <- temp2[row_index, ]
-          new_row$times <- newtimes  
-          temp2 <- rbind(temp2, new_row)
-          temp2 <- temp2[order(temp2$times),]
-        }
+        # if(!is.null(newtimes)){
+        #   row_index <- findInterval(newtimes, temp0$times0, left.open = TRUE)
+        #   new_row <- temp2[row_index, ]
+        #   new_row$times <- newtimes  
+        #   temp2 <- rbind(temp2, new_row)
+        #   temp2 <- temp2[order(temp2$times),]
+        # }
         mult <- diff(floor(c(0,temp2$times)))
 
         temp2$overall_survival<- exp(-cumsum(mult*temp2$hinstO))
@@ -125,14 +129,14 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       }
       
       ipredictions <- list(
-        overall_survival = matrix(results$overall_survival, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
-        overall_hazard =  matrix(results$overall_hazard, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
-        population_survival = matrix(results$population_survival, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
-        population_hazard = matrix(results$population_hazard, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
-        relative_survival = matrix(results$relative_survival, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
-        relative_hazard = matrix(results$relative_hazard, ncol=length(times[-1])+length(newtimes), byrow = TRUE),
-        population_cif = matrix(results$population_cif, ncol=length(times[-1])+length(newtimes), byrow = TRUE), 
-        excess_cif = matrix(results$excess_cif, ncol=length(times[-1])+length(newtimes), byrow = TRUE)
+        overall_survival = matrix(results$overall_survival, ncol=length(times[-1]), byrow = TRUE),
+        overall_hazard =  matrix(results$overall_hazard, ncol=length(times[-1]), byrow = TRUE),
+        population_survival = matrix(results$population_survival, ncol=length(times[-1]), byrow = TRUE),
+        population_hazard = matrix(results$population_hazard, ncol=length(times[-1]), byrow = TRUE),
+        relative_survival = matrix(results$relative_survival, ncol=length(times[-1]), byrow = TRUE),
+        relative_hazard = matrix(results$relative_hazard, ncol=length(times[-1]), byrow = TRUE),
+        population_cif = matrix(results$population_cif, ncol=length(times[-1]), byrow = TRUE), 
+        excess_cif = matrix(results$excess_cif, ncol=length(times[-1]), byrow = TRUE)
       )
       
       .numerator <- apply(ipredictions$overall_survival, FUN="sum", MARGIN=2)
@@ -168,24 +172,33 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       
       ### log-likelihood 
       ## on récpère intervalles où tombent les temps d'evt et de censure
-      
-      event_time <- findInterval(splann$y[,1], splann$intervals,left.open = TRUE)
-      
-      pop_hinst <- sapply(1:(dim(data)[1]), function(i) {
-        ipredictions$population_hazard[i, event_time[i]]
-      })
-      #on récupère le risque instantané en exces au temps d'evt/censure
-      exc_hinst <- sapply(1:(dim(data)[1]), function(i) {
-        ipredictions$relative_hazard[i, event_time[i]]
-      })
-      #et la survie nette au temps d'evt/censure 
-      net_surv <-  sapply(1:(dim(data)[1]), function(i) {
-        ipredictions$relative_survival[i, event_time[i]]
-      })
-      
-      if (identical(data, splann$data[,-c(length(splann$data)-1 ,length(splann$data))])) {
-          loglik <- sum(splann$y[,2]*log(pop_hinst+exc_hinst)+log(net_surv)) 
-      }
+      if(all(c(as.character(object$formula[[2]][2]), as.character(object$formula[[2]][3])) %in% names(data))) {
+        
+        event_time <- findInterval(data[,as.character(object$formula[[2]][2])], splann$intervals,left.open = TRUE)
+        event_time[event_time > dim(ipredictions$population_hazard)[2]] <- dim(ipredictions$population_hazard)[2]
+        pop_hinst <- sapply(1:(dim(data)[1]), function(i) {
+          ipredictions$population_hazard[i, event_time[i]]
+        })
+        #on récupère le risque instantané en exces au temps d'evt/censure
+        exc_hinst <- sapply(1:(dim(data)[1]), function(i) {
+          ipredictions$relative_hazard[i, event_time[i]]
+        })
+        #et la survie nette au temps d'evt/censure 
+        net_surv <-  sapply(1:(dim(data)[1]), function(i) {
+          ipredictions$relative_survival[i, event_time[i]]
+        })
+        
+     
+        loglik <- sum(data[,as.character(object$formula[[2]][3])]*log(pop_hinst+exc_hinst)+log(net_surv))
+
+    }
+      # if(!(identical(data, splann$data[,-c(length(splann$data)-1 ,length(splann$data))]))) {
+      #   if(all(c(as.character(object$formula[[2]][2]), as.character(object$formula[[2]][3])) %in% names(data))) {
+      #       loglik <- sum(data[,as.character(object$formula[[2]][3])]*log(pop_hinst+exc_hinst)+log(net_surv))
+      #     }else{
+      #       #do nothing and don"t compute the loglikelihood
+      #     }
+      #   }
           
       if(!is.null(newtimes)) 
         {
@@ -239,7 +252,6 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         nnet = splann,
         times = 0:max(times),
         x = data[,c(colnames(splann$x))],
-        y =  data[, c(as.character(splann$formula[[2]][2]), as.character(splann$formula[[2]][3]))],
         ays = data[,c(age, year, sex)],
         ratetable = ratetable,
         ipredictions = list(
@@ -285,6 +297,9 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       )
       if (exists("loglik")) {
         res$loglik = loglik
+      }
+      if(all(c(as.character(object$formula[[2]][2]), as.character(object$formula[[2]][3])) %in% names(data))){
+        res$y =  data[, c(as.character(splann$formula[[2]][2]), as.character(splann$formula[[2]][3]))]
       }
       class(res) <- "predictRS"
       return(res)
