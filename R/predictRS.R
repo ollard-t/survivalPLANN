@@ -204,7 +204,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
         {
         newtimes <- unique(newtimes)      
         
-        nouveautime <- sort(c(newtimes, times))
+        nouveautime <- sort(unique(round(c(newtimes, times),6)))
         idx <- findInterval(newtimes, nouveautime, left.open = TRUE) 
       
         ipredictions$overall_survival <- as.data.frame( ipredictions$overall_survival[,pmin(idx,length(nouveautime)-1)] )
@@ -250,7 +250,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
       
       res <- list(
         nnet = splann,
-        times = 0:max(times),
+        times = c(0,times), #anciennement 0:max(times) au 24 sep
         x = data[,c(colnames(splann$x))],
         ays = data[,c(age, year, sex)],
         ratetable = ratetable,
