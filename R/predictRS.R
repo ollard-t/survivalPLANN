@@ -44,6 +44,10 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   hinstO <- (hcumO[,2:length(times)] - hcumO[,1:(length(times)-1)])/splann[["inter"]]
   hinstO[hinstO==Inf] <- NA
   
+  for(i in 1:(length(times)-1)){
+    if(all(hinstO[,i] == 0)){hinstO[,i] <- hinstO[,i-1]}
+  }
+  
   for (i in 1:N)
   { 
     if(sum(survO[i,]==0)>0)
