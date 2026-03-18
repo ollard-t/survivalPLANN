@@ -1,5 +1,5 @@
 
-cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=1, size = 8, decay = 0.01,
+cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=365.241/12, size = 8, decay = 0.01,
                     maxit = 1000, MaxNWts=10000, metric = "ibs")
 {
   
@@ -167,10 +167,14 @@ cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=1, size = 8, deca
   
   .res <- data.frame(inter = .grid[,1], size = .grid[,2], decay=.grid[,3],
                      maxit = .grid[,4], MaxNWts = .grid[,5], measure = .measure)
-  
-  .maxi<-.res[which(.res$measure==max(.res$measure, na.rm=TRUE) & is.na(.res$measure)==FALSE),]
-  .maxi<-.maxi[1,]
-  
+  if(metric %in% c("ci",  "ibll", "bll", "auc", "ribll")){
+    .maxi<-.res[which(.res$measure==max(.res$measure, na.rm=TRUE) & is.na(.res$measure)==FALSE),]
+    .maxi<-.maxi[1,]
+  }
+  if(metric %in% c("ibs", "bs", "ribs")){
+    .maxi<-.res[which(.res$measure==min(.res$measure, na.rm=TRUE) & is.na(.res$measure)==FALSE),]
+    .maxi<-.maxi[1,]
+    }
   return( list(optimal=list(inter=.maxi$inter,
                             size=.maxi$size,
                             decay=.maxi$decay,
