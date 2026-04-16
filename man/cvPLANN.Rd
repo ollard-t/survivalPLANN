@@ -19,7 +19,7 @@ cvPLANN(formula, pro.time=NULL, data, cv=10, inter=1, size=8, decay=0.01,
   of the times is chosen.}
   \item{data}{A data frame in which to look for the variables included in the \code{formula}.}
   \item{cv}{The number of splits for cross-validation. The default value is 10.}
-  \item{inter}{A numeric value representing the length of the intervals.}
+  \item{inter}{A numeric value representing the length of the intervals. Default is set to 365.241/12}
   \item{size}{A numeric value for the number of units in the hidden layer. Default is set to 8}
   \item{decay}{A numeric value for the parameter for weight decay. Default is set to 0.01}
   \item{maxit}{A numeric value for the maximum number of iterations. Default is set to 1000.}
