@@ -2,6 +2,7 @@
 predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
 {
   
+  
   if (!inherits(object, "sPLANN")) stop("The object must be of class 'sPLANN'")
   if (missing(object)) stop("an object of the class sPLANN is required")
   if (missing(data)) stop("a data argument is required")
@@ -41,7 +42,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   P <- dim(survO)[2]
   
   hcumO <- -1*log(survO)
-  hinstO <- (hcumO[,2:length(times)] - hcumO[,1:(length(times)-1)])/splann[["inter"]]
+  hinstO <- (hcumO[,2:length(times), drop = FALSE] - hcumO[,1:(length(times)-1), drop = FALSE])/splann[["inter"]]
   hinstO[hinstO==Inf] <- NA
   
   for(i in 1:(length(times)-1)){
@@ -68,7 +69,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   ))
   
   
-  hinstP <- hP[,1:(length(times)-1)]
+  hinstP <- hP[,1:(length(times)-1), drop = FALSE]
   
   hinstE <- pmax(hinstO - hinstP, 0)
   
@@ -131,14 +132,14 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   results[-1] <- as.data.frame(res_mat)
   
   ipredictions <- list(
-    overall_survival = matrix(results$overall_survival, ncol=length(times[-1]), byrow = TRUE),
-    overall_hazard =  matrix(results$overall_hazard, ncol=length(times[-1]), byrow = TRUE),
-    population_survival = matrix(results$population_survival, ncol=length(times[-1]), byrow = TRUE),
-    population_hazard = matrix(results$population_hazard, ncol=length(times[-1]), byrow = TRUE),
-    relative_survival = matrix(results$relative_survival, ncol=length(times[-1]), byrow = TRUE),
-    relative_hazard = matrix(results$relative_hazard, ncol=length(times[-1]), byrow = TRUE),
-    population_cif = matrix(results$population_cif, ncol=length(times[-1]), byrow = TRUE), 
-    excess_cif = matrix(results$excess_cif, ncol=length(times[-1]), byrow = TRUE)
+    overall_survival = matrix(results$overall_survival, ncol=length(times[-1]), nrow = dim(data)[1], byrow = TRUE),
+    overall_hazard =  matrix(results$overall_hazard, ncol=length(times[-1]), nrow = dim(data)[1], byrow = TRUE),
+    population_survival = matrix(results$population_survival, ncol=length(times[-1]), nrow = dim(data)[1], byrow = TRUE),
+    population_hazard = matrix(results$population_hazard, ncol=length(times[-1]), nrow = dim(data)[1], byrow = TRUE),
+    relative_survival = matrix(results$relative_survival, ncol=length(times[-1]), nrow = dim(data)[1], byrow = TRUE),
+    relative_hazard = matrix(results$relative_hazard, ncol=length(times[-1]), nrow = dim(data)[1], byrow = TRUE),
+    population_cif = matrix(results$population_cif, ncol=length(times[-1]), nrow = dim(data)[1], byrow = TRUE), 
+    excess_cif = matrix(results$excess_cif, ncol=length(times[-1]), nrow = dim(data)[1], byrow = TRUE)
   )
   
   .numerator <- colSums(ipredictions$overall_survival)
@@ -203,14 +204,14 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
     nouveautime <- sort(unique(round(c(newtimes, times),6)))
     idx <- findInterval(newtimes, nouveautime, left.open = TRUE) 
     
-    ipredictions$overall_survival <- as.data.frame( ipredictions$overall_survival[,pmin(idx,length(nouveautime)-1)] )
-    ipredictions$overall_hazard <- as.data.frame( ipredictions$overall_hazard[,pmin(idx,length(nouveautime)-1)] )
-    ipredictions$population_survival <- as.data.frame( ipredictions$population_survival[,pmin(idx,length(nouveautime)-1)] )
-    ipredictions$population_hazard <- as.data.frame( ipredictions$population_hazard[,pmin(idx,length(nouveautime)-1)] )
-    ipredictions$relative_survival <- as.data.frame( ipredictions$relative_survival[,pmin(idx,length(nouveautime)-1)] )
-    ipredictions$relative_hazard <- as.data.frame( ipredictions$relative_hazard[,pmin(idx,length(nouveautime)-1)] )
-    ipredictions$population_cif <- as.data.frame( ipredictions$population_cif[,pmin(idx,length(nouveautime)-1)] )
-    ipredictions$excess_cif <- as.data.frame( ipredictions$excess_cif[,pmin(idx,length(nouveautime)-1)] )
+    ipredictions$overall_survival <- as.data.frame( ipredictions$overall_survival[,pmin(idx,length(nouveautime)-1), drop = FALSE] )
+    ipredictions$overall_hazard <- as.data.frame( ipredictions$overall_hazard[,pmin(idx,length(nouveautime)-1), drop = FALSE] )
+    ipredictions$population_survival <- as.data.frame( ipredictions$population_survival[,pmin(idx,length(nouveautime)-1), drop = FALSE] )
+    ipredictions$population_hazard <- as.data.frame( ipredictions$population_hazard[,pmin(idx,length(nouveautime)-1), drop = FALSE] )
+    ipredictions$relative_survival <- as.data.frame( ipredictions$relative_survival[,pmin(idx,length(nouveautime)-1), drop = FALSE] )
+    ipredictions$relative_hazard <- as.data.frame( ipredictions$relative_hazard[,pmin(idx,length(nouveautime)-1), drop = FALSE] )
+    ipredictions$population_cif <- as.data.frame( ipredictions$population_cif[,pmin(idx,length(nouveautime)-1), drop = FALSE] )
+    ipredictions$excess_cif <- as.data.frame( ipredictions$excess_cif[,pmin(idx,length(nouveautime)-1), drop = FALSE] )
     
     overall_survival <- overall_survival[pmin(idx,length(nouveautime)-1)] 
     overall_hazard <- overall_hazard[pmin(idx,length(nouveautime)-1)] 
