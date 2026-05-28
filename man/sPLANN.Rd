@@ -28,10 +28,8 @@ sPLANN(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
 
 \value{
 \item{formula}{The \code{formula} object.}
-\item{fitsurvivalnet}{The fitted \code{nnet} object.}
+\item{fitsurvivalnet}{A reduced version of the fitted \code{nnet} object.}
 \item{data}{The data frame given with the computed \code{Intervals} column added.}
-\item{data_dup}{The base data frame with the duplicated rows based on the \code{Intervals} column. }
-\item{call}{The function call for the creation of the \code{nnet} object.}
 \item{inter}{The interval length.}
 \item{size}{The number of units in the hidden layer.}
 \item{decay}{The value of the parameter for weight decay.}
@@ -45,7 +43,7 @@ sPLANN(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
 }
 
 \details{
-The \code{nnet} loss function parameter is fixed to \code{entropy} as Biganzoli's PLANN method minimize the cross-entrophy loss function which correspondS to maximizing the loglikelihood.
+The \code{nnet} loss function parameter is fixed to \code{entropy} as in the PLANN method, as minimize the cross-entropy loss function results in maximizing the log-likelihood function.
 }
 
 \references{Biganzoli E, Boracchi P, Mariani L, and et al. Feed forward neural networks for the analysis of censored survival data: a partial logistic regression approach. Stat Med, 17:1169-86, 1998.}

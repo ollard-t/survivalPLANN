@@ -87,11 +87,11 @@ sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
   survnet <- do.call(nnet, c(list(formula = formulaInt, data = data_dup, size = size, maxit = maxit, 
                                   MaxNWts = MaxNWts, decay = decay, entropy = TRUE, trace = trace), args))
   
+  survnet$call <- NULL
+  survnet$residuals <- NULL #pour libérer de la place, car sinon, object très gros 
   res <- list(formula = formula,
               fitsurvivalnet = survnet,
               data = data,
-              data_dup = data_dup,
-              call = survnet$call,
               inter = inter,
               size = size,
               decay = decay,
