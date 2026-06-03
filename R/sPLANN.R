@@ -1,8 +1,7 @@
 
 sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
                    maxit =100, MaxNWts=10000, trace = FALSE, ...)
-  function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
-           maxit =100, MaxNWts=10000, trace = FALSE, ...)
+  
   {
     
     ####### check errors
