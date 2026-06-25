@@ -12,9 +12,8 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   if (missing(sex)) stop("a sex argument is required")
   if (missing(year)) stop("a year argument is required")
   
-  if (length(dim(ratetable))!=3) stop("The life table must have 3 dimensions: age, year, sex")
-  if (dim(ratetable)[3]!=2) stop("The life table must have 3 dimensions: age, year, sex")
-  
+  if (length(dim(ratetable))!=3) stop("The life table must have 3 dimensions in the order : age, year, sex")
+
   covnames <- colnames(object$x)
   .age <- age
   .year <- year
@@ -243,11 +242,11 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   idx <- findInterval(usable_times, object$intervals, left.open = TRUE)
   col_names <- paste0(usable_times," in ",ints_names[idx])
   
-  
+  times_out <- if(is.null(newtimes)){times}else{c(0,times)}
   
   res <- list(
     nnet = splann,
-    times = c(0,times), #anciennement 0:max(times) au 24 sep
+    times = times_out, #anciennement 0:max(times) au 24 sep
     x = data[,c(colnames(splann$x))],
     ays = data[,c(age, year, sex)],
     ratetable = ratetable,

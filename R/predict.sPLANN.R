@@ -76,7 +76,7 @@ predict.sPLANN <- function(object, newdata = NULL, newtimes = NULL, ...)
     usable_times <- newtimes[newtimes <= pro.time]
     out_time <- newtimes[newtimes > pro.time]
     idx <- findInterval(usable_times, intervals, left.open = TRUE)
-    predictions <- as.data.frame(predictions[,pmin(idx,length(intervals-1))])
+    predictions <- as.data.frame(predictions[,pmin(idx,length(intervals)-1)])
     col_names <- paste0(usable_times," in ",ints_names[idx])
     
     if(length(out_time)>0){
