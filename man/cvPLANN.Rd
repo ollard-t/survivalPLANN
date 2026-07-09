@@ -10,7 +10,7 @@ Cross-validation method for the hyper-parameters for an object of class \code{sP
 
 \usage{
 cvPLANN(formula, pro.time=NULL, data, cv=10, inter=1, size=8, decay=0.01,
-                    maxit=1000, MaxNWts=10000, metric = "ibs")
+                    maxit=1000, MaxNWts=10000, metric = "ibs", stand = NULL)
 }
 
 \arguments{
@@ -25,6 +25,8 @@ cvPLANN(formula, pro.time=NULL, data, cv=10, inter=1, size=8, decay=0.01,
   \item{maxit}{A numeric value for the maximum number of iterations. Default is set to 1000.}
   \item{MaxNWts}{The maximum allowable number of weights. There is no intrinsic limit in the code, but increasing MaxNWts will probably allow fits that are very slow and time-consuming. Default is set to 10000}
   \item{metric}{The metric used to select the best set of parameters from the cross-validation. See the function 'metrics' for more details. Default is set to "ibs".}
+  \item{stand}{A vector of the continuous variable names to standardize in the data set. Default value is NULL.}
+
 }
 
 \value{
@@ -37,7 +39,7 @@ data(dataK) # the database with the observed sample
 
 tune.sPLANN <- cvPLANN(Surv(time, event)~ stade + delay, data=dataK, cv=10,
                      inter=365.241, size=c(2, 4, 8), decay=c(0.01, 0.1),
-                    maxit=1000, MaxNWts=10000, metric = "ibs")
+                    maxit=1000, MaxNWts=10000, metric = "ibs", stand = NULL)
                      
 tune.sPLANN$optimal
 }
