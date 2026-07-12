@@ -57,7 +57,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   }
   
   max_age <- max(as.numeric(dimnames(ratetable)[[1]]))
-  max_year <- max(as.numeric(dimnames(ratetable)[[2]]))
+  max_year <- max(as.numeric(dimnames(ratetable)[[3]]))
   
   hP <- t(vapply(seq_len(nrow(data)),function(i)
     survivalNET::expectedhaz(
