@@ -12,7 +12,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   if (missing(sex)) stop("a sex argument is required")
   if (missing(year)) stop("a year argument is required")
   
-  if (!all(c("age", "sex", "year") %in% attr(ratetable, "dimid"))){stop("The ratetable must contain dimensions named 'age', 'year', and 'sex'.")
+  if (!all(c("age", "sex", "year") %in% attr(ratetable, "dimid"))){stop("The ratetable must contain dimensions named 'age', 'year', and 'sex'.")}
     
   covnames <- colnames(object$x)
   .age <- age
