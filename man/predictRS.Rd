@@ -16,7 +16,7 @@ This function produces several net survival predictions from a neural network ba
 \item{data}{A data frame comprising of new observed predictors}
 \item{newtimes}{A optional numeric vector comprising of times to get survival estimations. If \code{NULL}, the times are each increment between 1 and the outer bund of the last inervall of the "sPLANN" object.}
 \item{ratetable}{A table of expected rates of the studied event, i.e an array with three dimensions
-in the order : age, sex and year, such as \code{fr.ratetable} for the mortality of the French 
+in the order : age, year and sex, such as \code{fr.ratetable} for the mortality of the French 
 population.}\item{age}{A numeric vector with the patient age at baseline in days.}
 \item{year}{A numeric vector with the baseline date in the study respecting the date format: number of days since 01.01.1960.}
 \item{sex}{A character vector with the gender: "male" or "female".}
