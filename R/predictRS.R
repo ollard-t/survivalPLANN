@@ -59,7 +59,7 @@ predictRS <- function(object, data, newtimes = NULL, ratetable, age, year, sex)
   hP <- t(vapply(seq_len(nrow(data)),function(i)
     survivalNET::expectedhaz(
       ratetable, age=data[i,age], sex=data[i,sex], year=data[i,year] ,
-      time = times, max_age = max_age, max_year = max_year
+      time = times, max_age = NULL, max_year = NULL
     ),
     FUN.VALUE = numeric(length(times))
   ))
