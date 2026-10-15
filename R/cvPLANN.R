@@ -1,6 +1,6 @@
 
 cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=365.241/12, size = 8, decay = 0.01,
-                    maxit = 1000, MaxNWts=10000, metric = "ibs")
+                    maxit = 1000, MaxNWts=10000, metric = "ibs", stand = NULL)
 {
   
   ####### check errors
@@ -22,10 +22,7 @@ cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=365.241/12, size 
     vars <- trimws(unlist(strsplit(var_string, ",")))
     return(vars)
   }
-  
-  ##différentiation quanti/quali
-  quali_col <- c()  
-  quanti_col <- c() 
+
   warn <- 0 
   col_warn <- c()
   
@@ -38,19 +35,11 @@ cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=365.241/12, size 
       col_warn <- c(col_warn, col)
     }
     
-    if (all(unique_values %in% c(0, 1))) {
-      quali_col <- c(quali_col, col) 
-    } else if (length(unique_values) > 2) {
-      quanti_col <- c(quanti_col, col) 
-    }
   }
   if (warn > 0) {
     warning(paste(warn, "columns have exactly 2 modalities but are not 0 and 1. (",col_warn,"). Those
                   columns have been considered as quantitative variables."))
   }
-  
-  cov.quali <- quali_col
-  cov.quanti <- quanti_col
   
     
   if(length(group_term) == 0){
@@ -62,7 +51,7 @@ cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=365.241/12, size 
 
   ####
   
-    data.plann <- data[,c(times, failures, group, CV)]
+  data.plann <- data[,c(times, failures, group, CV)]
   
   if(is.null(pro.time)) {pro.time <- median(data[,times])}
   
@@ -84,10 +73,27 @@ cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=365.241/12, size 
   
   .CVtune<-vector("list",cv*dim(.grid)[1])
   
+  if (!is.null(stand)) {
+        if (!is.character(stand))
+      stop("'standardize' must be a character vector of variable names.")
+    missing_vars <- setdiff(stand, names(data.plann))
+    if (length(missing_vars) > 0)
+      stop("The following variables are not in 'data': ",
+        paste(missing_vars, collapse = ", "))
+  }
+  
   l<-1
   for (k in 1:cv){
+    trainSt <- data.plann[data.plann$folds != k, ]
+    validSt <- data.plann[data.plann$folds == k, ]
+    if (!is.null(stand)) {
+      muSt <- sapply(trainSt[, stand, drop = FALSE], mean)
+      sigmaSt <- sapply(trainSt[, stand, drop = FALSE], sd)
+      trainSt[, stand] <- scale(trainSt[, stand, drop = FALSE], center = muSt, scale = sigmaSt)
+      validSt[, stand] <- scale(validSt[, stand, drop = FALSE],center = muSt,scale = sigmaSt)
+    }
     for (j in 1:dim(.grid)[1]){
-      .CVtune[[l]]<-list(train=data.plann[data.plann$folds!=k, ], valid=data.plann[data.plann$folds==k, ], grid=.grid[j,])
+      .CVtune[[l]]<-list(train=trainSt, valid=validSt, grid=.grid[j,])
       l=l+1
     }
   }
@@ -126,8 +132,8 @@ cvPLANN <- function(formula, pro.time=NULL, data, cv=10, inter=365.241/12, size 
 
     
     if(!is.null(newtimes)) {
-      .pred.plann <- cbind(rep(1, dim(.pred)[1]), .pred)
-      .time.plann <- c(0, .time.plann)
+      .pred.plann <- .pred
+      .time.plann <- .time.plann
       
       idx=findInterval(newtimes, .time.plann)
       .pred=.pred.plann[,pmax(1,idx)]

@@ -38,15 +38,7 @@ plot.sPLANN <- function(x, n.groups=5, pro.time=NULL, newdata=NULL, ...){
   .obs <- sapply(1:n.groups, FUN = function(x) {
     .indic <- sum(as.numeric(.survfit$strata)==x & .survfit$time<=pro.time)
     .survfit$surv[ .indic ] } )
-  
-  .lower <- sapply(1:n.groups, FUN = function(x) {
-    .indic <- sum(as.numeric(.survfit$strata)==x & .survfit$time<=pro.time)
-    .survfit$lower[ .indic ] } )
-  
-  .upper <- sapply(1:n.groups, FUN = function(x) {
-    .indic <- sum(as.numeric(.survfit$strata)==x & .survfit$time<=pro.time)
-    .survfit$upper[ .indic ] } )
-  
+
   if(hasArg(cex)==FALSE) {cex <-1} else {cex <- list(...)$cex}
   if(hasArg(cex.lab)==FALSE) {cex.lab <- 1} else {cex.lab <- list(...)$cex.lab}
   if(hasArg(cex.axis)==FALSE) {cex.axis <- 1} else {cex.axis <- list(...)$cex.axis}
@@ -70,5 +62,4 @@ plot.sPLANN <- function(x, n.groups=5, pro.time=NULL, newdata=NULL, ...){
   
   abline(c(0,1), lty=2)
   
-  segments(x0 = .est, y0 = .lower, x1 = .est, y1 = .upper, col = col, lwd = lwd)
 }
