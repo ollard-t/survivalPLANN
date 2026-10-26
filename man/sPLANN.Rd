@@ -39,7 +39,7 @@ sPLANN(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
 \item{y}{The values of \code{time} and \code{event}.}
 \item{x}{The model covariates values.}
 \item{intervals}{The intervals limits values.}
-\item{missing}{The rows with a missing value in the data base.}
+\item{missing}{Return the index of the rows with at least one missing value in the data base.}
 }
 
 \details{

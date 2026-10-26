@@ -22,13 +22,13 @@ sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
     for(i in colnames(cova)){ if(!is.numeric(cova[,i])) stop("All covariates must be numeric")  }
     
     d <- cbind(time, event, cova)
-    na <- !is.na(apply(d, MARGIN=1, FUN = "sum"))
+    keep <- !is.na(apply(d, MARGIN=1, FUN = "sum"))
     
-    time <- time[na]
-    event <- event[na]
-    cova <- cova[na, , drop = FALSE]
+    time <- time[keep]
+    event <- event[keep]
+    cova <- cova[keep, , drop = FALSE]
     
-    data <- data[na,]
+    data <- data[keep,]
     
     #### making of intervals from PLANN
     
@@ -85,7 +85,7 @@ sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
 
       if ("weights" %in% names(args)) {
       weights = args$weights
-      weights <- weights[na]
+      weights <- weights[keep]
       dup_count <- unname(table(data_dup$id))
       weights <- rep(weights,dup_count)
       args$weights = weights
@@ -109,7 +109,7 @@ sPLANN <- function(formula, data, pro.time=NULL, inter, size = 32, decay = 0.01,
                 x = cova,
                 intervals = intervals,
                 pro.time = pro.time, #pour calcul logll predictRS
-                missing = !na
+                missing = unname(which(!keep)) 
     )
     class(res) <- "sPLANN"
     return(res)
